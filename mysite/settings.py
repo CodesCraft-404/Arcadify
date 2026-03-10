@@ -72,7 +72,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://postgres:[sicklittlegames4]@db.eppomdnkppoamshnxnvc.supabase.co:5432/postgres'),
+        default=os.environ.get('postgresql://postgres:sicklittlegames4@db.eppomdnkppoamshnxnvc.supabase.co:5432/postgres'),
         conn_max_age=600,   # keeps connections open for performance
         ssl_require=True    # Supabase requires SSL
     )
