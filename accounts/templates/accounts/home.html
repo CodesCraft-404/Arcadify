@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+<style>
+body { margin:0; font-family: 'Segoe UI', sans-serif; background:#1e1e2f; color:#fff; }
+.top-bar { display:flex; justify-content: space-between; align-items:center; padding: 15px; background:#111; }
+.user-info { font-size:16px; }
+.circle-btn { width:35px; height:35px; border-radius:50%; background:#4caf50; cursor:pointer; text-align:center; line-height:35px; font-weight:bold; transition:0.3s; }
+.circle-btn:hover { background:#45a049; }
+.logout-panel {
+    display:none;
+    position:absolute;
+    right:20px;
+    top:60px;
+    background:#222;
+    padding:10px;
+    border-radius:8px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.5);
+    transition: opacity 0.3s ease;
+}
+.logout-panel button {
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:#ff4c4c;
+    color:white;
+    cursor:pointer;
+}
+.logout-panel button:hover { background:#e04343; }
+
+@media (max-width: 500px){
+    .top-bar { flex-direction: column; gap:10px; align-items:flex-start; }
+    .circle-btn { width:40px; height:40px; line-height:40px; }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="user-info">Logged In as: {{ request.user.gamer_name }}</div>
+    <div style="position:relative;">
+        <div class="circle-btn" onclick="toggleLogout()">&#x25BC;</div>
+        <div class="logout-panel" id="logoutPanel">
+            <form action="{% url 'logout' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleLogout(){
+    const panel = document.getElementById('logoutPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+</body>
+</html>

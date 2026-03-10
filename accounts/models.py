@@ -1,0 +1,49 @@
+# accounts/models.py
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.utils import timezone
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, gmail, password, **extra_fields):
+        if not gmail:
+            raise ValueError('The Email (gmail) must be set')
+        gmail = self.normalize_email(gmail)
+        user = self.model(gmail=gmail, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, gmail, password, **extra_fields):
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_active', True)
+
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+
+        return self.create_user(gmail, password, **extra_fields)
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    id = models.BigAutoField(primary_key=True)                # ID
+    name = models.CharField(max_length=100)                  # Full name
+    gamer_name = models.CharField(max_length=50, unique=True) # Gamer name
+    age = models.PositiveIntegerField(null=True, blank=True) # Age
+    gmail = models.EmailField(unique=True)                   # Email/login
+    date_joined = models.DateTimeField(default=timezone.now) # Date joined
+    last_login = models.DateTimeField(blank=True, null=True) # Last login
+    is_superuser = models.BooleanField(default=False)        # Superuser
+    is_staff = models.BooleanField(default=False)            # Staff/admin
+    is_active = models.BooleanField(default=True)            # Active/banned
+    is_online = models.BooleanField(default=False)           # Online status
+    level = models.PositiveIntegerField(default=1)           # Level
+    coins = models.IntegerField(default=0)                   # Coins
+
+    USERNAME_FIELD = 'gmail'           # login with gmail
+    REQUIRED_FIELDS = ['name', 'gamer_name'] # required for superuser creation
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.gamer_name
