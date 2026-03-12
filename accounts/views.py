@@ -73,8 +73,8 @@ def reset_admin(request):
 
     # create new one
     User.objects.create_superuser(
-        gmail="admin@gmail.com",
-        password="Admin12345!"
+        gmail="marvel@tw.com",
+        password="NEONI"
     )
 
     return HttpResponse("Admin reset complete")
