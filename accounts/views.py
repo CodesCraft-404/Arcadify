@@ -67,13 +67,13 @@ from django.http import HttpResponse
 
 def create_superuser(request):
     User = get_user_model()
-    if not User.objects.filter(gmail="youremail@gmail.com").exists():
+    if not User.objects.filter(gmail="marvel@tw.com").exists():
         User.objects.create_superuser(
-            gmail="youremail@gmail.com",
-            password="YourPassword123!",
+            gmail="marvel@tw.com",
+            password="NEONI",
             is_staff=True,
             is_superuser=True,
-            name="Admin"
+            name="Marvel"
         )
         return HttpResponse("Superuser created!")
     return HttpResponse("Superuser already exists.")
