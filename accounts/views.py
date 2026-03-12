@@ -62,18 +62,19 @@ def logout_view(request):
     logout(request)
     return redirect('login_register')
 
+import os
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse
 
-def create_superuser(request):
+def create_superuser_if_not_exists():
     User = get_user_model()
-    if not User.objects.filter(gmail="marvel@tw.com").exists():
-        User.objects.create_superuser(
-            gmail="marvel@tw.com",
-            password="NEONI",
-            is_staff=True,
-            is_superuser=True,
-            name="Marvel"
-        )
-        return HttpResponse("Superuser created!")
-    return HttpResponse("Superuser already exists.")
+    email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+    username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+    password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+    if email and username and password:
+        if not User.objects.filter(email=email).exists():
+            User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password
+            )
