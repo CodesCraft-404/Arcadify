@@ -72,7 +72,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://marvelstudioxd:pBDP9pvdqh1lMx2hm7JVsiPB0AgT9Xmc@dpg-d6neqeshg0os73a61k20-a/game_platform_db_uv3v'),
+        default=os.environ.get('postgresql://marvelstudioxd:uE1WDkhdZUtq20PdP1BY9KC3fX0uWHPF@dpg-d6pal7dm5p6s73do1p9g-a/arc_db_jbik'),
         conn_max_age=600,   # keeps connections open for performance
         ssl_require=True    # Supabase requires SSL
     )
