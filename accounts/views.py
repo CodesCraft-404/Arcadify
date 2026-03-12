@@ -62,19 +62,3 @@ def logout_view(request):
     logout(request)
     return redirect('login_register')
 
-import os
-from django.contrib.auth import get_user_model
-
-def create_superuser_if_not_exists():
-    User = get_user_model()
-    email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
-    username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
-    password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
-
-    if email and username and password:
-        if not User.objects.filter(email=email).exists():
-            User.objects.create_superuser(
-                username=username,
-                email=email,
-                password=password
-            )
