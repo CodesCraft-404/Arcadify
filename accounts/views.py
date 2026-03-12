@@ -62,3 +62,19 @@ def logout_view(request):
     logout(request)
     return redirect('login_register')
 
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+def reset_admin(request):
+    User = get_user_model()
+
+    # delete any existing admin
+    User.objects.filter(is_superuser=True).delete()
+
+    # create new one
+    User.objects.create_superuser(
+        gmail="admin@gmail.com",
+        password="Admin12345!"
+    )
+
+    return HttpResponse("Admin reset complete")
