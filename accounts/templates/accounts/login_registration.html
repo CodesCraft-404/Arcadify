@@ -2,9 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Improved mobile viewport -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Mobile fullscreen support -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+
 <title>Login / Registration</title>
+
 <style>
+
     /* ----- BODY ----- */
     body {
         margin: 0;
@@ -16,6 +27,7 @@
         justify-content: center;
         align-items: center;
         overflow: hidden;
+        touch-action: manipulation; /* better mobile tapping */
     }
 
     /* ----- PANEL ----- */
@@ -30,10 +42,13 @@
         flex-direction: column;
         gap: 15px;
         text-align: center;
+
         opacity: 0;
         transform: scale(0.95);
         pointer-events: none;
         transition: all 0.4s ease;
+
+        min-height: 380px;
     }
 
     .panel.active {
@@ -87,68 +102,130 @@
         margin-top: -5px;
     }
 
-    /* ----- RESPONSIVE ----- */
-    @media (max-width: 500px) {
-        .panel { padding: 20px; }
-        input, button { font-size: 16px; }
-        .switch { font-size: 15px; }
+    /* ----- MOBILE ----- */
+    @media (max-width: 700px) {
+
+        body{
+            padding:10px;
+        }
+
+        .panel{
+            width:100%;
+            max-width:420px;
+            padding:22px;
+            min-height:420px;
+        }
+
+        input{
+            font-size:16px;
+            padding:14px;
+        }
+
+        button{
+            font-size:16px;
+            padding:14px;
+        }
+
+        .switch{
+            font-size:15px;
+        }
+
     }
+
+    /* ----- LANDSCAPE PHONES ----- */
+    @media (max-height:500px) and (orientation: landscape){
+
+        body{
+            align-items:flex-start;
+            padding-top:20px;
+        }
+
+        .panel{
+            min-height:auto;
+            max-height:90vh;
+            overflow-y:auto;
+        }
+
+    }
+
 </style>
 </head>
+
 <body>
+
 <div id="loginPanel" class="panel active">
     <span class="switch" onclick="togglePanel()">Don't have an account? Register</span>
+
     {% if messages %}
         {% for message in messages %}
             <div class="error">{{ message }}</div>
         {% endfor %}
     {% endif %}
+
     <input type="text" name="gamer_name" id="loginGamerName" placeholder="Gamer Name">
     <input type="password" name="password" id="loginPassword" placeholder="Password">
+
     <button onclick="submitLogin()">Login</button>
 </div>
 
 <div id="registerPanel" class="panel">
+
     <span class="switch" onclick="togglePanel()">Already have an account? Login</span>
+
     {% if messages %}
         {% for message in messages %}
             <div class="error">{{ message }}</div>
         {% endfor %}
     {% endif %}
+
     <input type="text" name="name" id="regName" placeholder="Your Name">
     <input type="text" name="gamer_name" id="regGamerName" placeholder="Gamer Name">
     <input type="number" name="age" id="regAge" placeholder="Age">
     <input type="email" name="gmail" id="regGmail" placeholder="Email">
     <input type="password" name="password" id="regPassword" placeholder="Password">
     <input type="password" name="confirm_password" id="regConfirmPassword" placeholder="Confirm Password">
+
     <button onclick="submitRegister()">Register</button>
 </div>
 
 <script>
+
 function togglePanel() {
+
     const login = document.getElementById('loginPanel');
     const register = document.getElementById('registerPanel');
+
     login.classList.toggle('active');
     register.classList.toggle('active');
+
 }
 
-// ----- SUBMIT FORMS -----
+// ----- SUBMIT LOGIN -----
+
 function submitLogin(){
+
     const form = document.createElement('form');
     form.method = 'POST';
+
     form.innerHTML = `
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <input type="hidden" name="login" value="1">
         <input type="hidden" name="gamer_name" value="${document.getElementById('loginGamerName').value}">
         <input type="hidden" name="password" value="${document.getElementById('loginPassword').value}">
     `;
+
     document.body.appendChild(form);
     form.submit();
+
 }
 
+// ----- SUBMIT REGISTER -----
+
 function submitRegister(){
+
     const form = document.createElement('form');
     form.method = 'POST';
+
     form.innerHTML = `
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <input type="hidden" name="register" value="1">
@@ -159,9 +236,13 @@ function submitRegister(){
         <input type="hidden" name="password" value="${document.getElementById('regPassword').value}">
         <input type="hidden" name="confirm_password" value="${document.getElementById('regConfirmPassword').value}">
     `;
+
     document.body.appendChild(form);
     form.submit();
+
 }
+
 </script>
+
 </body>
 </html>
