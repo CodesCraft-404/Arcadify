@@ -4,6 +4,19 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import CustomUser
 
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+if not User.objects.filter(is_superuser=True).exists():
+    User.objects.create_superuser(
+        gmail="cosmic@gmail.com",
+        name="Cosmic",
+        gamer_name="Cosmic",
+        age=19,
+        password="NEON1"
+    )
+
 def login_register_view(request):
     if request.method == 'POST':
         if 'login' in request.POST:
@@ -18,6 +31,11 @@ def login_register_view(request):
             user = authenticate(request, gmail=user_obj.gmail, password=password)
             if user is not None:
                 login(request, user)
+
+                # check if superuser
+                if user.is_superuser:
+                    return redirect('admin_page')
+
                 return redirect('home')
             else:
                 messages.error(request, 'Incorrect password!')
@@ -62,3 +80,12 @@ def logout_view(request):
     logout(request)
     return redirect('login_register')
 
+def admin_page_view(request):
+
+    if not request.user.is_authenticated:
+        return redirect('login_register')
+
+    if not request.user.is_superuser:
+        return redirect('home')
+
+    return render(request, 'accounts/admin.html')
