@@ -1,105 +1,138 @@
-```html
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-
-<title>Login / Registration</title>
+<title>Arcade Login</title>
 
 <style>
 
-/* ----- BODY ----- */
+/* ---------- GLOBAL ---------- */
+
 body{
     margin:0;
     font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-    background:linear-gradient(135deg,#1e1e2f,#2a2a40);
-    color:#fff;
+
+    background:
+        linear-gradient(rgba(15,23,42,0.75), rgba(15,23,42,0.85)),
+        url("{% static 'images/login_bg.jpg' %}");
+
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+
     height:100vh;
+
     display:flex;
     justify-content:center;
     align-items:center;
-    overflow:hidden;
-    touch-action:manipulation;
+
+    color:white;
 }
 
-/* ----- CENTER CONTAINER ----- */
+/* ---------- CARD ---------- */
+
+/* ---------- CONTAINER ---------- */
+
 .container{
+    width:380px;
+    max-width:90%;
+    min-height:420px;
     position:relative;
-    width:100%;
-    max-width:380px;
 }
 
-/* ----- PANEL ----- */
+/* ---------- PANEL ---------- */
+
 .panel{
-    position:absolute;
-    inset:0;
 
-    padding:28px 24px;
+    padding:30px;
 
-    background:rgba(0,0,0,0.88);
-    border-radius:12px;
+    border-radius:14px;
 
-    box-shadow:0 10px 35px rgba(0,0,0,0.7);
+    background:rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,0.15);
+
+    box-shadow:
+    0 10px 35px rgba(0,0,0,0.45);
 
     display:flex;
     flex-direction:column;
     gap:12px;
-
-    text-align:center;
-
-    opacity:0;
-    transform:scale(0.96);
-    pointer-events:none;
-
-    transition:all .35s ease;
+    display:none;
 }
 
-/* ACTIVE PANEL */
+.panel.active{
+    display:flex;
+}
+
+@keyframes panelFade{
+    from{
+        opacity:0;
+        transform:scale(.97);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+
 .panel.active{
     opacity:1;
     transform:scale(1);
     pointer-events:auto;
 }
 
-/* ----- INPUTS ----- */
+/* ---------- TITLE ---------- */
+
+.title{
+    font-size:22px;
+    font-weight:600;
+    text-align:center;
+    margin-bottom:10px;
+}
+
+/* ---------- INPUT ---------- */
+
 input{
     width:100%;
     height:40px;
-    padding:0 10px;
+
+    background:#1e293b;
+    border:1px solid #334155;
 
     border-radius:6px;
-    border:none;
 
-    background:#2f2f2f;
-    color:#fff;
+    padding:0 10px;
+    color:white;
 
     font-size:14px;
+
     box-sizing:border-box;
 }
 
 input:focus{
     outline:none;
-    background:#3a3a3a;
+    border-color:#22c55e;
 }
 
-/* ----- BUTTON ----- */
-button{
-    width:100%;
-    height:42px;
+/* ---------- BUTTON ---------- */
 
+button{
+    height:42px;
     border:none;
     border-radius:6px;
 
-    background:#4caf50;
-
+    background:#22c55e;
     color:white;
+
     font-weight:600;
     font-size:14px;
 
@@ -107,53 +140,41 @@ button{
 }
 
 button:hover{
-    background:#43a047;
+    background:#16a34a;
 }
 
-/* ----- SWITCH ----- */
+/* ---------- SWITCH ---------- */
+
 .switch{
-    color:#6dd46d;
+    text-align:center;
     font-size:13px;
+    color:#9ca3af;
     cursor:pointer;
 }
 
-/* ----- ERROR ----- */
+.switch span{
+    color:#22c55e;
+}
+
+/* ---------- ERROR ---------- */
+
 .error{
-    color:#ff5b5b;
-    font-size:12px;
+    color:#ef4444;
+    font-size:13px;
+    text-align:center;
 }
 
-/* ----- MOBILE ----- */
-@media (max-width:600px){
+/* ---------- MOBILE ---------- */
 
-    .container{
-        max-width:320px;
-    }
+@media(max-width:500px){
 
-    .panel{
-        padding:22px 20px;
-        gap:10px;
-    }
-
-    input{
-        height:36px;
-        font-size:13px;
-    }
-
-    button{
-        height:38px;
-        font-size:13px;
-    }
-
+.container{
+    width:320px;
 }
 
-/* ----- VERY SHORT SCREENS ----- */
-@media (max-height:500px){
-
-    body{
-        align-items:flex-start;
-        padding-top:20px;
-    }
+.panel{
+    padding:26px;
+}
 
 }
 
@@ -164,9 +185,11 @@ button:hover{
 
 <div class="container">
 
+<!-- LOGIN -->
+
 <div id="loginPanel" class="panel active">
 
-<span class="switch" onclick="togglePanel()">Don't have an account? Register</span>
+<div class="title">Login</div>
 
 {% if messages %}
 {% for message in messages %}
@@ -174,16 +197,22 @@ button:hover{
 {% endfor %}
 {% endif %}
 
-<input type="text" id="loginGamerName" placeholder="Gamer Name">
-<input type="password" id="loginPassword" placeholder="Password">
+<input id="loginGamerName" placeholder="Gamer Name">
+<input id="loginPassword" type="password" placeholder="Password">
 
 <button onclick="submitLogin()">Login</button>
 
+<div class="switch" onclick="togglePanel()">
+Don't have an account? <span>Register</span>
 </div>
+
+</div>
+
+<!-- REGISTER -->
 
 <div id="registerPanel" class="panel">
 
-<span class="switch" onclick="togglePanel()">Already have an account? Login</span>
+<div class="title">Register</div>
 
 {% if messages %}
 {% for message in messages %}
@@ -191,14 +220,18 @@ button:hover{
 {% endfor %}
 {% endif %}
 
-<input type="text" id="regName" placeholder="Your Name">
-<input type="text" id="regGamerName" placeholder="Gamer Name">
-<input type="number" id="regAge" placeholder="Age">
-<input type="email" id="regGmail" placeholder="Email">
-<input type="password" id="regPassword" placeholder="Password">
-<input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+<input id="regName" placeholder="Your Name">
+<input id="regGamerName" placeholder="Gamer Name">
+<input id="regAge" type="number" placeholder="Age">
+<input id="regGmail" type="email" placeholder="Email">
+<input id="regPassword" type="password" placeholder="Password">
+<input id="regConfirmPassword" type="password" placeholder="Confirm Password">
 
-<button onclick="submitRegister()">Register</button>
+<button onclick="submitRegister()">Create Account</button>
+
+<div class="switch" onclick="togglePanel()">
+Already have an account? <span>Login</span>
+</div>
 
 </div>
 
@@ -206,55 +239,57 @@ button:hover{
 
 <script>
 
+/* PANEL SWITCH */
+
 function togglePanel(){
 
-const login=document.getElementById('loginPanel');
-const register=document.getElementById('registerPanel');
+const login=document.getElementById("loginPanel")
+const register=document.getElementById("registerPanel")
 
-login.classList.toggle('active');
-register.classList.toggle('active');
+login.classList.toggle("active")
+register.classList.toggle("active")
 
 }
 
-/* ----- LOGIN ----- */
+/* LOGIN */
 
 function submitLogin(){
 
-const form=document.createElement('form');
-form.method='POST';
+const form=document.createElement("form")
+form.method="POST"
 
 form.innerHTML=`
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <input type="hidden" name="login" value="1">
-<input type="hidden" name="gamer_name" value="${document.getElementById('loginGamerName').value}">
-<input type="hidden" name="password" value="${document.getElementById('loginPassword').value}">
-`;
+<input type="hidden" name="gamer_name" value="${loginGamerName.value}">
+<input type="hidden" name="password" value="${loginPassword.value}">
+`
 
-document.body.appendChild(form);
-form.submit();
+document.body.appendChild(form)
+form.submit()
 
 }
 
-/* ----- REGISTER ----- */
+/* REGISTER */
 
 function submitRegister(){
 
-const form=document.createElement('form');
-form.method='POST';
+const form=document.createElement("form")
+form.method="POST"
 
 form.innerHTML=`
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <input type="hidden" name="register" value="1">
-<input type="hidden" name="name" value="${document.getElementById('regName').value}">
-<input type="hidden" name="gamer_name" value="${document.getElementById('regGamerName').value}">
-<input type="hidden" name="age" value="${document.getElementById('regAge').value}">
-<input type="hidden" name="gmail" value="${document.getElementById('regGmail').value}">
-<input type="hidden" name="password" value="${document.getElementById('regPassword').value}">
-<input type="hidden" name="confirm_password" value="${document.getElementById('regConfirmPassword').value}">
-`;
+<input type="hidden" name="name" value="${regName.value}">
+<input type="hidden" name="gamer_name" value="${regGamerName.value}">
+<input type="hidden" name="age" value="${regAge.value}">
+<input type="hidden" name="gmail" value="${regGmail.value}">
+<input type="hidden" name="password" value="${regPassword.value}">
+<input type="hidden" name="confirm_password" value="${regConfirmPassword.value}">
+`
 
-document.body.appendChild(form);
-form.submit();
+document.body.appendChild(form)
+form.submit()
 
 }
 
@@ -262,4 +297,4 @@ form.submit();
 
 </body>
 </html>
-```
+
