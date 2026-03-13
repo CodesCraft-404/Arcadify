@@ -1,12 +1,11 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 
-<!-- Improved mobile viewport -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-<!-- Mobile fullscreen support -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,229 +15,246 @@
 
 <style>
 
-    /* ----- BODY ----- */
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
-        color: #fff;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        touch-action: manipulation; /* better mobile tapping */
+/* ----- BODY ----- */
+body{
+    margin:0;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:linear-gradient(135deg,#1e1e2f,#2a2a40);
+    color:#fff;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    touch-action:manipulation;
+}
+
+/* ----- CENTER CONTAINER ----- */
+.container{
+    position:relative;
+    width:100%;
+    max-width:380px;
+}
+
+/* ----- PANEL ----- */
+.panel{
+    position:absolute;
+    inset:0;
+
+    padding:28px 24px;
+
+    background:rgba(0,0,0,0.88);
+    border-radius:12px;
+
+    box-shadow:0 10px 35px rgba(0,0,0,0.7);
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+    text-align:center;
+
+    opacity:0;
+    transform:scale(0.96);
+    pointer-events:none;
+
+    transition:all .35s ease;
+}
+
+/* ACTIVE PANEL */
+.panel.active{
+    opacity:1;
+    transform:scale(1);
+    pointer-events:auto;
+}
+
+/* ----- INPUTS ----- */
+input{
+    width:100%;
+    height:40px;
+    padding:0 10px;
+
+    border-radius:6px;
+    border:none;
+
+    background:#2f2f2f;
+    color:#fff;
+
+    font-size:14px;
+    box-sizing:border-box;
+}
+
+input:focus{
+    outline:none;
+    background:#3a3a3a;
+}
+
+/* ----- BUTTON ----- */
+button{
+    width:100%;
+    height:42px;
+
+    border:none;
+    border-radius:6px;
+
+    background:#4caf50;
+
+    color:white;
+    font-weight:600;
+    font-size:14px;
+
+    cursor:pointer;
+}
+
+button:hover{
+    background:#43a047;
+}
+
+/* ----- SWITCH ----- */
+.switch{
+    color:#6dd46d;
+    font-size:13px;
+    cursor:pointer;
+}
+
+/* ----- ERROR ----- */
+.error{
+    color:#ff5b5b;
+    font-size:12px;
+}
+
+/* ----- MOBILE ----- */
+@media (max-width:600px){
+
+    .container{
+        max-width:320px;
     }
 
-    /* ----- PANEL ----- */
-    .panel {
-        width: 350px;
-        max-width: 90%;
-        padding: 30px 25px;
-        background: rgba(0,0,0,0.85);
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-
-        opacity: 0;
-        transform: scale(0.95);
-        pointer-events: none;
-        transition: all 0.4s ease;
-
-        min-height: 380px;
+    .panel{
+        padding:22px 20px;
+        gap:10px;
     }
 
-    .panel.active {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
+    input{
+        height:36px;
+        font-size:13px;
     }
 
-    /* ----- INPUTS ----- */
-    input {
-        padding: 12px 10px;
-        border-radius: 6px;
-        border: none;
-        width: 100%;
-        font-size: 14px;
-        background: #333;
-        color: #fff;
-        outline: none;
-        transition: 0.3s;
+    button{
+        height:38px;
+        font-size:13px;
     }
 
-    input:focus { background: #444; }
+}
 
-    /* ----- BUTTONS ----- */
-    button {
-        padding: 12px;
-        border-radius: 6px;
-        border: none;
-        background: #4caf50;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
+/* ----- VERY SHORT SCREENS ----- */
+@media (max-height:500px){
+
+    body{
+        align-items:flex-start;
+        padding-top:20px;
     }
 
-    button:hover { background: #45a049; }
-
-    /* ----- SWITCH TEXT ----- */
-    .switch {
-        color: #4caf50;
-        cursor: pointer;
-        font-size: 14px;
-        margin-bottom: 10px;
-        text-decoration: underline;
-    }
-
-    /* ----- ERROR MESSAGES ----- */
-    .error {
-        color: #ff4c4c;
-        font-size: 13px;
-        margin-top: -5px;
-    }
-
-    /* ----- MOBILE ----- */
-    @media (max-width: 700px) {
-
-        body{
-            padding:10px;
-        }
-
-        .panel{
-            width:100%;
-            max-width:420px;
-            padding:22px;
-            min-height:420px;
-        }
-
-        input{
-            font-size:16px;
-            padding:14px;
-        }
-
-        button{
-            font-size:16px;
-            padding:14px;
-        }
-
-        .switch{
-            font-size:15px;
-        }
-
-    }
-
-    /* ----- LANDSCAPE PHONES ----- */
-    @media (max-height:500px) and (orientation: landscape){
-
-        body{
-            align-items:flex-start;
-            padding-top:20px;
-        }
-
-        .panel{
-            min-height:auto;
-            max-height:90vh;
-            overflow-y:auto;
-        }
-
-    }
+}
 
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <div id="loginPanel" class="panel active">
-    <span class="switch" onclick="togglePanel()">Don't have an account? Register</span>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="error">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+<span class="switch" onclick="togglePanel()">Don't have an account? Register</span>
 
-    <input type="text" name="gamer_name" id="loginGamerName" placeholder="Gamer Name">
-    <input type="password" name="password" id="loginPassword" placeholder="Password">
+{% if messages %}
+{% for message in messages %}
+<div class="error">{{ message }}</div>
+{% endfor %}
+{% endif %}
 
-    <button onclick="submitLogin()">Login</button>
+<input type="text" id="loginGamerName" placeholder="Gamer Name">
+<input type="password" id="loginPassword" placeholder="Password">
+
+<button onclick="submitLogin()">Login</button>
+
 </div>
 
 <div id="registerPanel" class="panel">
 
-    <span class="switch" onclick="togglePanel()">Already have an account? Login</span>
+<span class="switch" onclick="togglePanel()">Already have an account? Login</span>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="error">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+{% for message in messages %}
+<div class="error">{{ message }}</div>
+{% endfor %}
+{% endif %}
 
-    <input type="text" name="name" id="regName" placeholder="Your Name">
-    <input type="text" name="gamer_name" id="regGamerName" placeholder="Gamer Name">
-    <input type="number" name="age" id="regAge" placeholder="Age">
-    <input type="email" name="gmail" id="regGmail" placeholder="Email">
-    <input type="password" name="password" id="regPassword" placeholder="Password">
-    <input type="password" name="confirm_password" id="regConfirmPassword" placeholder="Confirm Password">
+<input type="text" id="regName" placeholder="Your Name">
+<input type="text" id="regGamerName" placeholder="Gamer Name">
+<input type="number" id="regAge" placeholder="Age">
+<input type="email" id="regGmail" placeholder="Email">
+<input type="password" id="regPassword" placeholder="Password">
+<input type="password" id="regConfirmPassword" placeholder="Confirm Password">
 
-    <button onclick="submitRegister()">Register</button>
+<button onclick="submitRegister()">Register</button>
+
+</div>
+
 </div>
 
 <script>
 
-function togglePanel() {
+function togglePanel(){
 
-    const login = document.getElementById('loginPanel');
-    const register = document.getElementById('registerPanel');
+const login=document.getElementById('loginPanel');
+const register=document.getElementById('registerPanel');
 
-    login.classList.toggle('active');
-    register.classList.toggle('active');
+login.classList.toggle('active');
+register.classList.toggle('active');
 
 }
 
-// ----- SUBMIT LOGIN -----
+/* ----- LOGIN ----- */
 
 function submitLogin(){
 
-    const form = document.createElement('form');
-    form.method = 'POST';
+const form=document.createElement('form');
+form.method='POST';
 
-    form.innerHTML = `
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        <input type="hidden" name="login" value="1">
-        <input type="hidden" name="gamer_name" value="${document.getElementById('loginGamerName').value}">
-        <input type="hidden" name="password" value="${document.getElementById('loginPassword').value}">
-    `;
+form.innerHTML=`
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<input type="hidden" name="login" value="1">
+<input type="hidden" name="gamer_name" value="${document.getElementById('loginGamerName').value}">
+<input type="hidden" name="password" value="${document.getElementById('loginPassword').value}">
+`;
 
-    document.body.appendChild(form);
-    form.submit();
+document.body.appendChild(form);
+form.submit();
 
 }
 
-// ----- SUBMIT REGISTER -----
+/* ----- REGISTER ----- */
 
 function submitRegister(){
 
-    const form = document.createElement('form');
-    form.method = 'POST';
+const form=document.createElement('form');
+form.method='POST';
 
-    form.innerHTML = `
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        <input type="hidden" name="register" value="1">
-        <input type="hidden" name="name" value="${document.getElementById('regName').value}">
-        <input type="hidden" name="gamer_name" value="${document.getElementById('regGamerName').value}">
-        <input type="hidden" name="age" value="${document.getElementById('regAge').value}">
-        <input type="hidden" name="gmail" value="${document.getElementById('regGmail').value}">
-        <input type="hidden" name="password" value="${document.getElementById('regPassword').value}">
-        <input type="hidden" name="confirm_password" value="${document.getElementById('regConfirmPassword').value}">
-    `;
+form.innerHTML=`
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<input type="hidden" name="register" value="1">
+<input type="hidden" name="name" value="${document.getElementById('regName').value}">
+<input type="hidden" name="gamer_name" value="${document.getElementById('regGamerName').value}">
+<input type="hidden" name="age" value="${document.getElementById('regAge').value}">
+<input type="hidden" name="gmail" value="${document.getElementById('regGmail').value}">
+<input type="hidden" name="password" value="${document.getElementById('regPassword').value}">
+<input type="hidden" name="confirm_password" value="${document.getElementById('regConfirmPassword').value}">
+`;
 
-    document.body.appendChild(form);
-    form.submit();
+document.body.appendChild(form);
+form.submit();
 
 }
 
@@ -246,3 +262,4 @@ function submitRegister(){
 
 </body>
 </html>
+```
