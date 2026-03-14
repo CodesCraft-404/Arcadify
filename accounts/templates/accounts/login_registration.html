@@ -251,117 +251,93 @@ button{
 }
 
 .intro-panel{
-
     position:absolute;
     right:0;
     top:0;
 
     width:350px;
-    height:420px;
+    height:210px;
 
     padding:30px;
 
     background:none;
-
-    border:2px solid transparent;
-
-    overflow:hidden;
 }
 
-.intro-panel::before,
-.intro-panel::after{
-
-    content:"";
-    position:absolute;
-
-    border:2px solid #38bdf8;
-
-    width:0;
-    height:0;
-
-    top:0;
-    left:0;
-
-    animation:drawBorder 2s forwards;
-}
-
-@keyframes drawBorder{
-
-0%{
-    width:0;
-    height:0;
-}
-
-25%{
-    height:100%;
-}
-
-50%{
-    width:100%;
-}
-
-75%{
-    height:100%;
-}
-
-100%{
-    width:100%;
-}
-}
-
-.intro-panel{
-    position:absolute;
-    right:0;
-    top:0;
-
-    width:350px;
-    height:420px;
-
-    padding:30px;
-
-    border:2px solid transparent;
-}
-
-.intro-panel::before{
-    content:"";
+/* container */
+.border-anim{
     position:absolute;
     inset:0;
-
-    border:2px solid #38bdf8;
-
-    clip-path: inset(0 100% 100% 0);
-
-    animation:draw 2s linear forwards;
+    pointer-events:none;
 }
 
-@keyframes draw{
-
-0%{
-    clip-path: inset(0 100% 100% 0);
+/* border lines */
+.border-anim span{
+    position:absolute;
+    background:#38bdf8;
 }
 
-25%{
-    clip-path: inset(0 100% 0 0);
+/* LEFT side (top → bottom) */
+.border-anim span:nth-child(1){
+    left:0;
+    top:0;
+    width:2px;
+    height:0;
+    animation:leftLine .15s linear forwards;
 }
 
-50%{
-    clip-path: inset(0 0 0 0);
+/* BOTTOM (left → right) */
+.border-anim span:nth-child(2){
+    left:0;
+    bottom:0;
+    height:2px;
+    width:0;
+    animation:bottomLine .15s linear forwards;
+    animation-delay:.15s;
 }
 
-75%{
-    clip-path: inset(100% 0 0 0);
+/* RIGHT (bottom → top) */
+.border-anim span:nth-child(3){
+    right:0;
+    bottom:0;
+    width:2px;
+    height:0;
+    animation:rightLine .15s linear forwards;
+    animation-delay:.30s;
 }
 
-100%{
-    clip-path: inset(0 0 0 0);
+/* TOP (right → left) */
+.border-anim span:nth-child(4){
+    right:0;
+    top:0;
+    height:2px;
+    width:0;
+    animation:topLine .15s linear forwards;
+    animation-delay:.45s;
 }
+
+/* animations */
+
+@keyframes leftLine{
+    to{height:100%;}
+}
+
+@keyframes bottomLine{
+    to{width:100%;}
+}
+
+@keyframes rightLine{
+    to{height:100%;}
+}
+
+@keyframes topLine{
+    to{width:100%;}
 }
 
 .panel-content{
     opacity:0;
     transform:translateY(20px);
     animation:contentFade 0.6s ease forwards;
-    animation-delay:2s;
+    animation-delay:0.5s;
 }
 
 @keyframes contentFade{
@@ -392,6 +368,14 @@ Rotate your device to landscape
 <div class="container">
 
 <div class="intro-panel">
+
+<div class="border-anim">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
     <div class="panel-content">
         <h2>Welcome to Arcade</h2>
         <p>Play games, compete with friends, and climb the leaderboard.</p>
