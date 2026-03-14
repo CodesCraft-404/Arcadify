@@ -74,14 +74,14 @@ body{
 
     border-radius:14px;
 
-    background:rgba(255,255,255,0.04); /* more transparent */
+    background:rgba(255,255,255,0.12); /* white semi transparent */
 
-    backdrop-filter:blur(6px);          /* less blur */
+    backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px);
 
-    border:1px solid rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.25);
 
-    box-shadow:0 10px 35px rgba(0,0,0,0.45);
+    box-shadow:0 10px 35px rgba(0,0,0,0.35);
 
     flex-direction:column;
     gap:12px;
@@ -120,17 +120,25 @@ input{
     width:100%;
     height:40px;
 
-    background:#1e293b;
-    border:1px solid #334155;
+    background:rgba(255,255,255,0.15); /* semi transparent */
+
+    border:1px solid rgba(255,255,255,0.3);
 
     border-radius:6px;
 
     padding:0 10px;
+
     color:white;
 
     font-size:14px;
 
     box-sizing:border-box;
+
+    backdrop-filter:blur(4px);
+}
+
+input::placeholder{
+    color:rgba(255,255,255,0.7);
 }
 
 input:focus{
@@ -147,28 +155,35 @@ button{
     border:none;
     border-radius:6px;
 
-    background:#38bdf8;
     color:white;
-
     font-weight:600;
     font-size:14px;
 
     cursor:pointer;
 
+    position:relative;
+    overflow:hidden;
+
+    background-size:cover;
+    background-position:center;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:8px;
+
+    text-shadow:0 2px 6px rgba(0,0,0,0.8);
 }
 
-button:hover{
-    background:#0ea5e9;
+.login-btn{
+    background-image:
+        linear-gradient(rgba(56,189,248,0.6), rgba(56,189,248,0.6)),
+        url("{% static 'images/icon.jpg' %}");
 }
 
-button img{
-    width:18px;
-    height:18px;
-    object-fit:contain;
+.register-btn{
+    background-image:
+        linear-gradient(rgba(56,189,248,0.6), rgba(56,189,248,0.6)),
+        url("{% static 'images/icon.jpg' %}");
 }
 
 /* ---------- SWITCH ---------- */
@@ -181,7 +196,13 @@ button img{
 }
 
 .switch span{
-    color:#22c55e;
+    color:white;
+    text-decoration:underline;
+    transition:opacity 0.2s;
+}
+
+.switch span:hover{
+    opacity:0.7;
 }
 
 /* ---------- ERROR ---------- */
@@ -255,8 +276,7 @@ Rotate your device to landscape
 <input id="loginGamerName" placeholder="Gamer Name">
 <input id="loginPassword" type="password" placeholder="Password">
 
-<button onclick="submitLogin()">
-<img src="{% static 'images/icon.jpg' %}">
+<button class="login-btn" onclick="submitLogin()">
 Login
 </button>
 
@@ -279,8 +299,7 @@ Don't have an account? <span>Register</span>
 <input id="regPassword" type="password" placeholder="Password">
 <input id="regConfirmPassword" type="password" placeholder="Confirm Password">
 
-<button onclick="submitRegister()">
-<img src="{% static 'images/icon.jpg' %}">
+<button class="register-btn" onclick="submitRegister()">
 Create Account
 </button>
 
