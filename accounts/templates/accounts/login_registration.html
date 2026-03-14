@@ -74,12 +74,12 @@ body{
 
     border-radius:14px;
 
-    background:rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.04); /* more transparent */
 
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
+    backdrop-filter:blur(6px);          /* less blur */
+    -webkit-backdrop-filter:blur(6px);
 
-    border:1px solid rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.08);
 
     box-shadow:0 10px 35px rgba(0,0,0,0.45);
 
@@ -135,27 +135,40 @@ input{
 
 input:focus{
     outline:none;
-    border-color:#22c55e;
+    border-color:#38bdf8;
+    box-shadow:0 0 0 1px #38bdf8;
 }
 
 /* ---------- BUTTON ---------- */
 
 button{
+
     height:42px;
     border:none;
     border-radius:6px;
 
-    background:#22c55e;
+    background:#38bdf8;
     color:white;
 
     font-weight:600;
     font-size:14px;
 
     cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
 }
 
 button:hover{
-    background:#16a34a;
+    background:#0ea5e9;
+}
+
+button img{
+    width:18px;
+    height:18px;
+    object-fit:contain;
 }
 
 /* ---------- SWITCH ---------- */
@@ -242,7 +255,10 @@ Rotate your device to landscape
 <input id="loginGamerName" placeholder="Gamer Name">
 <input id="loginPassword" type="password" placeholder="Password">
 
-<button onclick="submitLogin()">Login</button>
+<button onclick="submitLogin()">
+<img src="{% static 'images/icon.jpg' %}">
+Login
+</button>
 
 <div class="switch" onclick="togglePanel()">
 Don't have an account? <span>Register</span>
@@ -263,7 +279,10 @@ Don't have an account? <span>Register</span>
 <input id="regPassword" type="password" placeholder="Password">
 <input id="regConfirmPassword" type="password" placeholder="Confirm Password">
 
-<button onclick="submitRegister()">Create Account</button>
+<button onclick="submitRegister()">
+<img src="{% static 'images/icon.jpg' %}">
+Create Account
+</button>
 
 <div class="switch" onclick="togglePanel()">
 Already have an account? <span>Login</span>
