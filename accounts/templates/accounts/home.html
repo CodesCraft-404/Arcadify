@@ -613,15 +613,17 @@ const charAbilityEl = document.getElementById("charAbility");
 let currentChar = null;
 let skins = [];
 let currentSkinIndex = 0;
+let mainImage = "";
 
 // Load a character dynamically
-function loadCharacter(box){
+function loadCharacter(box) {
     currentChar = box.dataset.character;
+    mainImage = box.dataset.main;
     skins = box.dataset.skins ? box.dataset.skins.split(',') : [];
     currentSkinIndex = 0;
 
-    // Set main image
-    previewImage.src = box.dataset.main;
+    // Set main image first
+    previewImage.src = mainImage;
 
     // Set right container info
     charNameEl.textContent = currentChar;
@@ -630,16 +632,16 @@ function loadCharacter(box){
 }
 
 // Update preview image (main + skins)
-function updatePreviewImage(){
-    if(currentSkinIndex === 0){
-        previewImage.src = document.querySelector(".char-box.active").dataset.main;
+function updatePreviewImage() {
+    if (currentSkinIndex === 0) {
+        previewImage.src = mainImage; // Main char image
     } else {
-        previewImage.src = skins[(currentSkinIndex - 1) % skins.length];
+        previewImage.src = skins[(currentSkinIndex - 1) % skins.length]; // Skins
     }
 }
 
 // Default first box active
-if(boxes.length > 0){
+if (boxes.length > 0) {
     boxes[0].classList.add("active");
     loadCharacter(boxes[0]);
 }
@@ -653,14 +655,16 @@ boxes.forEach(box => {
     });
 });
 
-// Next / Prev buttons
+// Next button
 document.getElementById("nextChar").addEventListener("click", () => {
-    currentSkinIndex = (currentSkinIndex + 1) % (skins.length + 1);
+    currentSkinIndex = (currentSkinIndex + 1) % (skins.length + 1); // 0 = main, 1..n = skins
     updatePreviewImage();
 });
+
+// Prev button
 document.getElementById("prevChar").addEventListener("click", () => {
     currentSkinIndex--;
-    if(currentSkinIndex < 0) currentSkinIndex = skins.length;
+    if (currentSkinIndex < 0) currentSkinIndex = skins.length; // loop back to last skin
     updatePreviewImage();
 });
 
