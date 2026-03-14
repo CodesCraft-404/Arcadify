@@ -520,11 +520,12 @@ background:#43a047;
 
     <div class="char-grid">
         {% for char in characters %}
-        <div class="char-box" data-character="{{ char.name }}"
-             data-skins="{{ char.skins|join:',' }}"
-             data-info="{{ char.info }}"
-             data-ability="{{ char.ability }}"
-             data-main="{{ char.main_image }}">
+<div class="char-box" 
+     data-character="{{ char.name }}"
+     data-info="{{ char.info }}"
+     data-ability="{{ char.ability }}"
+     data-main="{% static char.main_image %}"
+     data-skins="{% for skin in char.skins %}{% static skin %}{% if not forloop.last %},{% endif %}{% endfor %}">
             <div class="char-inner">
                 <div class="char-image">
                     <img src="{% static char.main_image %}">
