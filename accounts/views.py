@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import CustomUser
+import os
+from django.conf import settings
 
 def login_register_view(request):
     if request.method == 'POST':
@@ -60,7 +62,52 @@ def login_register_view(request):
 def home_view(request):
     if not request.user.is_authenticated:
         return redirect('login_register')
-    return render(request, 'accounts/home.html')
+
+    # Path to characters folder (project-level static)
+    characters_dir = os.path.join(settings.BASE_DIR, 'static', 'images', 'characters')
+
+    characters = []
+
+    if os.path.exists(characters_dir):
+        for char_folder in os.listdir(characters_dir):
+            char_path = os.path.join(characters_dir, char_folder)
+            if os.path.isdir(char_path):
+                # Main image
+                main_img = f'images/characters/{char_folder}/{char_folder}.png'
+
+                # Skins
+                skin_path = os.path.join(char_path, 'skin')
+                skins = []
+                if os.path.exists(skin_path):
+                    skins = [
+                        f'images/characters/{char_folder}/skin/{f}'
+                        for f in sorted(os.listdir(skin_path)) if f.endswith('.png')
+                    ]
+
+                # Data files
+                data_path = os.path.join(char_path, 'data')
+                char_info = ''
+                char_ability = ''
+                if os.path.exists(data_path):
+                    info_file = os.path.join(data_path, 'info.txt')
+                    ability_file = os.path.join(data_path, 'ability.txt')
+                    if os.path.exists(info_file):
+                        with open(info_file, 'r', encoding='utf-8') as f:
+                            char_info = f.read().strip()
+                    if os.path.exists(ability_file):
+                        with open(ability_file, 'r', encoding='utf-8') as f:
+                            char_ability = f.read().strip()
+
+                # Append character data
+                characters.append({
+                    'name': char_folder,
+                    'main_image': main_img,
+                    'skins': skins,
+                    'info': char_info,
+                    'ability': char_ability,
+                })
+
+    return render(request, 'accounts/home.html', {'characters': characters})
 
 
 def logout_view(request):
