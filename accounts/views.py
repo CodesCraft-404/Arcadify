@@ -186,23 +186,26 @@ def respond_friend_request_ajax(request):
 @login_required
 def get_friends_ajax(request):
     user = request.user
+    try:
+        friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
+        friends = []
+        for f in friends_qs:
+            friend_user = f.user2 if f.user1 == user else f.user1
+            friends.append({
+                'id': friend_user.id,
+                'name': friend_user.gamer_name,
+                'online': getattr(friend_user, 'is_online', False)  # safe fallback
+            })
 
-    # Friends
-    friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
-    friends = []
-    for f in friends_qs:
-        friend_user = f.user2 if f.user1 == user else f.user1
-        friends.append({
-            'id': friend_user.id,
-            'name': friend_user.gamer_name,
-            'online': friend_user.is_online
-        })
+        pending_qs = FriendRequest.objects.filter(to_user=user, accepted=False)
+        pending_requests = [{'id': fr.id, 'name': fr.from_user.gamer_name} for fr in pending_qs]
 
-    # Pending friend requests
-    pending_qs = FriendRequest.objects.filter(to_user=user, accepted=False)
-    pending_requests = [{'id': fr.id, 'name': fr.from_user.gamer_name} for fr in pending_qs]
-
-    return JsonResponse({'friends': friends, 'pending_requests': pending_requests})
+        return JsonResponse({'friends': friends, 'pending_requests': pending_requests})
+    except Exception as e:
+        import traceback
+        print("Error in get_friends_ajax:", e)
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # ===== SEARCH USERS (AJAX) =====
