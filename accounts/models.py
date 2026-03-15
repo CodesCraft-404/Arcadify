@@ -1,4 +1,4 @@
-# accounts/models.py
+﻿# accounts/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils import timezone
@@ -47,3 +47,37 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.gamer_name
+
+# accounts/models.py (continuation)
+
+class FriendRequest(models.Model):
+    from_user = models.ForeignKey(
+        CustomUser, 
+        related_name='sent_requests', 
+        on_delete=models.CASCADE
+    )
+    to_user = models.ForeignKey(
+        CustomUser, 
+        related_name='received_requests', 
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)  # True if accepted
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')  # prevent duplicate requests
+
+    def __str__(self):
+        return f"{self.from_user.gamer_name} → {self.to_user.gamer_name} ({'Accepted' if self.accepted else 'Pending'})"
+
+
+class Friendship(models.Model):
+    user1 = models.ForeignKey(CustomUser, related_name='friendships_initiated', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(CustomUser, related_name='friendships_received', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user1', 'user2')  # prevent duplicate friendships
+
+    def __str__(self):
+        return f"{self.user1.gamer_name} ↔ {self.user2.gamer_name}"

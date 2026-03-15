@@ -480,6 +480,818 @@ transition:0.2s;
 background:#43a047;
 }
 
+.friends-open-btn{
+
+position:fixed;
+
+bottom:30px;
+right:30px;
+
+width:55px;
+height:55px;
+
+background:#3b82f6;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:24px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+box-shadow:0 8px 20px rgba(0,0,0,0.6);
+
+transition:0.2s;
+}
+
+.friends-open-btn:hover{
+transform:translateY(-3px);
+background:#2563eb;
+}
+
+/* =========================
+   FRIENDS PANEL
+========================= */
+
+.friends-panel{
+position:fixed;
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%) scale(0.9);
+
+width:920px;
+height:520px;
+
+background:#1b1e26;
+
+border-radius:14px;
+
+box-shadow:
+0 30px 70px rgba(0,0,0,0.9),
+inset 0 1px 0 rgba(255,255,255,0.04);
+
+display:flex;
+
+opacity:0;
+pointer-events:none;
+
+transition:0.25s;
+z-index:1002;
+}
+
+.friends-panel.show{
+opacity:1;
+pointer-events:auto;
+transform:translate(-50%,-50%) scale(1);
+}
+
+
+/* =========================
+   INNER FRAME
+========================= */
+
+.frame-border{
+
+flex:1;
+
+background:#151821;
+
+border-radius:12px;
+
+display:flex;
+
+padding:6px;  /* gives breathing space */
+
+overflow:visible;
+
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.friends-sidebar{
+
+position:relative;
+z-index:2;
+
+width:260px;
+
+background:linear-gradient(
+180deg,
+#202430,
+#181c24
+);
+
+border-radius:12px;
+
+box-shadow:
+0 12px 30px rgba(0,0,0,0.6);
+
+padding:16px;
+
+margin:10px;
+
+display:flex;
+flex-direction:column;
+
+gap:12px;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.panel-title{
+
+font-size:30px;
+font-weight:600;
+letter-spacing:0.5px;
+
+color:#e6e8ee;
+
+margin-top:-5px;
+margin-bottom:0px;
+margin-left:4px;   /* small push from left */
+
+text-shadow:
+0 1px 0 rgba(255,255,255,0.05),
+0 3px 8px rgba(0,0,0,0.8);
+}
+
+/* =========================
+   SEARCH BOX
+========================= */
+
+.search-box{
+
+height:36px;
+
+background:#12151c;
+
+border:1px solid rgba(255,255,255,0.08);
+
+border-radius:8px;
+
+padding:0 10px;
+
+color:white;
+
+outline:none;
+
+transition:0.2s;
+}
+
+.search-box:focus{
+border-color:#4f46e5;
+box-shadow:0 0 6px rgba(79,70,229,0.5);
+}
+
+
+/* =========================
+   FRIEND LIST
+========================= */
+
+.friends-list{
+
+flex:1;
+
+overflow-y:auto;
+overflow-x:hidden;
+
+display:flex;
+flex-direction:column;
+
+gap:4px;
+
+padding:6px 4px;
+
+border-top:1px solid rgba(255,255,255,0.08);
+border-bottom:1px solid rgba(255,255,255,0.08);
+
+}
+
+/* Chrome / Edge / Safari */
+.friends-list::-webkit-scrollbar{
+width:0px;
+}
+
+/* Firefox */
+.friends-list{
+scrollbar-width:none;
+}
+
+/* IE */
+.friends-list{
+-ms-overflow-style:none;
+}
+
+
+/* =========================
+   FRIEND ITEM
+========================= */
+
+.friend-item{
+
+display:flex;
+align-items:center;
+
+gap:10px;
+
+padding:8px 10px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+transition:0.2s;
+
+border-left:3px solid transparent; /* reserve space */
+
+}
+
+.friend-item:hover{
+
+background:#2d3240;
+
+box-shadow:0 4px 10px rgba(0,0,0,0.4);
+
+}
+
+/* ACTIVE FRIEND */
+
+.friend-item.active{
+
+background:#353b4b;
+
+border-left:3px solid #4f46e5;
+
+}
+
+
+/* =========================
+   AVATAR
+========================= */
+
+.avatar{
+
+width:34px;
+height:34px;
+
+border-radius:50%;
+
+background:#3a3f4c;
+
+flex-shrink:0;
+}
+
+
+/* =========================
+   FRIEND NAME
+========================= */
+
+.friend-name{
+font-size:14px;
+color:#d6d9e3;
+}
+
+
+/* =========================
+   ONLINE STATUS
+========================= */
+
+.online::before{
+content:"";
+width:8px;
+height:8px;
+background:#4caf50;
+border-radius:50%;
+margin-right:6px;
+}
+
+.offline::before{
+content:"";
+width:8px;
+height:8px;
+background:#777;
+border-radius:50%;
+margin-right:6px;
+}
+
+
+/* =========================
+   ADD FRIEND
+========================= */
+
+.add-friend{
+display:flex;
+flex-direction:column;
+gap:6px;
+margin-top:auto;
+}
+
+.add-friend input{
+
+height:34px;
+
+background:#12151c;
+
+border:1px solid rgba(255,255,255,0.08);
+
+border-radius:8px;
+
+padding:0 10px;
+
+color:white;
+}
+
+.add-friend button{
+
+height:36px;
+
+background:#4f46e5;
+
+border:none;
+
+border-radius:8px;
+
+color:white;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.2s;
+}
+
+.add-friend button:hover{
+background:#5a51ff;
+}
+
+
+/* =========================
+   CHAT AREA
+========================= */
+
+.chat-area{
+
+flex:1;
+
+display:flex;
+flex-direction:column;
+
+background:#151821;
+
+padding:20px;
+}
+
+
+/* =========================
+   CHAT HEADER
+========================= */
+
+.chat-header{
+
+font-size:16px;
+font-weight:600;
+
+color:#e4e7f2;
+
+margin-bottom:12px;
+
+padding-bottom:10px;
+
+border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+
+/* =========================
+   MESSAGE LIST
+========================= */
+
+.messages{
+
+flex:1;
+
+display:flex;
+flex-direction:column;
+
+gap:4px;
+
+overflow-y:auto;
+
+padding: 10px;
+
+scrollbar-width:thin;
+scrollbar-color:#3a3f50 #151821;
+}
+
+.messages::-webkit-scrollbar{
+width:10px;
+}
+
+.messages::-webkit-scrollbar-track{
+background:#151821;
+}
+
+.messages::-webkit-scrollbar-thumb{
+background:#3a3f50;
+border-radius:6px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover{
+background:#4f5670;
+}
+
+
+/* =========================
+   CHAT BUBBLES
+========================= */
+
+.message{
+
+max-width:300px;
+width:fit-content;
+
+padding:10px 14px;
+
+border-radius:14px;
+
+font-size:14px;
+
+line-height:1.4;
+
+overflow-wrap:break-word;
+
+}
+
+
+/* YOUR MESSAGE */
+
+.message.me{
+
+align-self:flex-end;
+
+background:#4f46e5;
+color:white;
+
+border-bottom-right-radius:0;
+
+box-shadow:0 6px 16px rgba(79,70,229,0.4);
+
+}
+
+.message.other{
+
+background:#232734;
+
+color:#dfe3ee;
+
+border-bottom-left-radius:0;
+
+}
+
+/* Highlight fade animation */
+@keyframes outlineFade {
+    0% {
+        outline: 2px solid white;
+        outline-offset: -2px;
+    }
+    100% {
+        outline: 0 solid white;
+        outline-offset: -2px;
+    }
+}
+
+.message.highlight {
+    animation: outlineFade 2s ease forwards; /* slower, smooth fade */
+}
+
+.message-row{
+
+display:flex;
+align-items:center;
+gap:6px;
+
+}
+
+.msg-actions{
+
+display:flex;
+gap:4px;
+
+opacity:0;
+transition:0.2s;
+
+}
+
+.message-row{
+
+display:flex;
+align-items:center;
+
+width:100%;
+
+}
+
+
+/* OTHER MESSAGE (LEFT) */
+
+.other-row{
+
+justify-content:flex-start;
+
+}
+
+
+/* YOUR MESSAGE (RIGHT) */
+
+.me-row{
+
+justify-content:flex-end;
+
+}
+
+.msg-time{
+
+font-size:11px;
+
+color:#8b8f9c;
+
+margin:2px 6px 2px 6px;
+
+opacity:0.8;
+
+}
+
+/* alignment */
+
+.time-other{
+text-align:left;
+}
+
+.time-me{
+text-align:right;
+}
+
+.message-row:hover .msg-actions{
+opacity:1;
+}
+
+.msg-actions button{
+
+background:#2d3240;
+border:none;
+
+color:#cfd3e0;
+
+font-size:12px;
+
+padding:4px 6px;
+
+border-radius:4px;
+
+cursor:pointer;
+
+}
+
+.msg-actions button:hover{
+background:#3a4053;
+}
+
+.edited-label{
+
+font-size:11px;
+
+color:#9aa0af;
+
+margin-left:6px;
+
+opacity:0.8;
+
+}
+
+.message.deleted{
+
+background:none !important;
+
+color:#b7bdf0;
+
+border:2px solid #4f46e5;
+
+border-bottom-right-radius:0;
+
+box-shadow:none;
+
+font-style:italic;
+
+}
+
+.reply-preview{
+
+display:none;
+
+align-items:center;
+justify-content:space-between;
+
+background:#202432;
+
+border-left:3px solid #4f46e5;
+
+padding:8px 10px;
+
+margin-bottom:6px;
+
+border-radius:6px;
+
+font-size:13px;
+
+color:#cfd3e0;
+
+}
+
+.reply-preview.show{
+display:flex;
+}
+
+.reply-content{
+display:flex;
+flex-direction:column;
+}
+
+.reply-label{
+
+font-size:11px;
+
+color:#8b8f9c;
+
+}
+
+.reply-cancel{
+
+background:none;
+border:none;
+
+color:#9aa0af;
+
+font-size:16px;
+
+cursor:pointer;
+
+padding:4px;
+
+}
+
+.reply-cancel:hover{
+color:white;
+}
+
+.reply-banner {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: -3px;
+    font-size: 12px;
+    color: #cfd3e0;
+    max-width: 100%;
+    justify-content: flex-start; /* left by default */
+}
+
+.reply-banner.me {
+    justify-content: flex-end; /* right for your messages */
+}
+
+.reply-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.reply-arrow {
+    font-size: 20px;
+    color: #999;
+    margin-left: auto; /* arrow stays at end for left messages */
+    transform: rotate(0deg); /* default, points right */
+}
+
+/* Rotate arrow for your messages */
+.reply-banner.me .reply-arrow {
+    margin-left: 0;
+    margin-right: 0;
+    transform: rotate(180deg); /* flips ➥ to point left */
+}
+
+/* =========================
+   CHAT INPUT
+========================= */
+
+.chat-input{
+
+display:flex;
+
+gap:10px;
+
+margin-top:12px;
+}
+
+.chat-input input{
+
+flex:1;
+
+height:38px;
+
+background:#10131a;
+
+border:1px solid rgba(255,255,255,0.08);
+
+border-radius:8px;
+
+padding:0 10px;
+
+color:white;
+
+outline:none;
+}
+
+.chat-input button{
+
+width:80px;
+
+background:#ff5252;
+
+border:none;
+
+border-radius:8px;
+
+color:white;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.2s;
+}
+
+.chat-input button:hover{
+background:#ff3b3b;
+}
+
+.panel-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Friends left, star right */
+    margin-bottom: 10px; /* optional spacing from input */
+}
+
+.panel-title {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #e6e8ee;
+    text-shadow:
+        0 1px 0 rgba(255,255,255,0.05),
+        0 3px 8px rgba(0,0,0,0.8);
+}
+
+.friend-star {
+    color: gold;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.friend-request-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #202432;
+}
+
+.friend-request-item .friend-name {
+    font-size: 14px;
+    color: #d6d9e3;
+}
+
+.request-actions button {
+    background: #3a3f4c;
+    border: none;
+    color: white;
+    font-size: 14px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+.request-actions button:hover {
+    background: #4f46e5;
+}
 </style>
 </head>
 <body>
@@ -506,7 +1318,11 @@ background:#43a047;
 ⚙
 </div>
 
-<div class="overlay" id="overlay" onclick="closeCenterPanel()"></div>
+<div class="friends-open-btn" onclick="openFriendsPanel()">
+👥
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
 
 <div class="center-panel" id="centerPanel">
 
@@ -568,7 +1384,100 @@ background:#43a047;
 </div>
 
 </div>
+
+<div class="friends-panel" id="friendsPanel">
+
+<div class="panel-close" onclick="closeFriendsPanel()">✕</div>
+
+<div class="frame-border">
+
+<!-- LEFT SIDEBAR -->
+<div class="friends-sidebar">
+
+<div class="panel-title-container">
+    <div class="panel-title">Friends</div>
+    <span class="friend-star">*</span>
+</div>
+
+<input class="search-box" placeholder="Search">
+
+<!-- FRIENDS LIST -->
+<div class="friends-list">
+{% for f in friends %}
+<div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
+    <div class="avatar"></div>
+    <div class="friend-name">{{ f.name }}</div>
+</div>
+{% empty %}
+<div style="padding:4px;">No friends yet.</div>
+{% endfor %}
+</div>
+
+<!-- FRIEND REQUESTS LIST -->
+<div class="friend-requests-list" style="display:none; flex-direction: column; gap: 4px; padding:6px 4px; border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
+{% for req in pending_requests %}
+<div class="friend-request-item" data-id="{{ req.id }}" data-name="{{ req.from_user.gamer_name }}">
+    <div class="friend-name">{{ req.from_user.gamer_name }}</div>
+    <div class="request-actions">
+        <button class="accept-btn">✔</button>
+        <button class="reject-btn">✖</button>
+    </div>
+</div>
+{% empty %}
+<div style="padding:4px;">No pending requests.</div>
+{% endfor %}
+</div>
+
+<div class="add-friend">
+
+<input placeholder="Player Name">
+
+<button>Add Friend</button>
+
+</div>
+
+</div>
+
+<!-- CHAT AREA -->
+<div class="chat-area">
+
+<div class="chat-header" id="chatHeader">
+Friend Chat Area
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div id="replyPreview" class="reply-preview">
+  <div class="reply-content">
+    <span class="reply-label">Replying to:</span>
+    <span id="replyText"></span>      <!-- original message -->
+    <span id="replySender"></span>    <!-- sender info below -->
+  </div>
+  <button class="reply-cancel" onclick="cancelReply()">✕</button>
+</div>
+
+<div class="chat-input">
+
+<input id="chatInput" placeholder="Type message...">
+<button>Send</button>
+
+</div>
+
+</div>
+
+</div>
+
 <script>
+
+function closeAllPanels(){
+
+closeCenterPanel();
+closeFriendsPanel();
+
+}
+
+
+
 function toggleMenu(){
 const panel=document.getElementById("menuPanel");
 panel.classList.toggle("show");
@@ -667,6 +1576,401 @@ document.getElementById("prevChar").addEventListener("click", () => {
     currentSkinIndex--;
     if (currentSkinIndex < 0) currentSkinIndex = skins.length; // loop back to last skin
     updatePreviewImage();
+});
+
+function openFriendsPanel(){
+document.getElementById("overlay").classList.add("show");
+document.getElementById("friendsPanel").classList.add("show");
+}
+
+function closeFriendsPanel(){
+document.getElementById("overlay").classList.remove("show");
+document.getElementById("friendsPanel").classList.remove("show");
+}
+
+/* =========================
+   TAB SWITCHING
+========================= */
+
+const tabs = document.querySelectorAll(".tab");
+
+tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+    });
+});
+
+/* =========================
+   CHAT DATA WITH UNIQUE IDS
+========================= */
+
+function generateId() {
+    return '_' + Math.random().toString(36).substr(2, 9);
+}
+
+const chatData = {
+  Alice: [
+    { type: "other", text: "Hello", time: new Date() },
+    { type: "me", text: "Hi!", time: new Date() }
+  ],
+  Bob: [
+    { type: "other", text: "Yo", time: new Date() },
+    { type: "me", text: "What's up?", time: new Date() },
+    // Reply from the other side
+    { 
+      type: "other", 
+      text: "I was asking about the project", 
+      time: new Date(), 
+      reply: {
+        id: 1,        // This should correspond to the ID of the message being replied to
+        text: "What's up?",
+        sender: "you" // your message being replied to
+      } 
+    }
+  ],
+  Charlie: [
+    { type: "other", text: "Hey there", time: new Date() }
+  ]
+};
+
+// ── Add these lines here ──
+let nextMessageId = 0; // global counter for unique message IDs
+
+function createMessage(type, text, reply = null) {
+  return {
+    id: nextMessageId++, // unique ID
+    type: type,
+    text: text,
+    time: new Date(),
+    reply: reply // optional reply info
+  };
+}
+
+/* =========================
+   FRIEND CLICK HANDLER
+========================= */
+
+const friends = document.querySelectorAll(".friend-item");
+const chatHeader = document.getElementById("chatHeader");
+
+let currentFriend = null;
+
+const chatInput = document.getElementById("chatInput");
+const sendButton = document.querySelector(".chat-input button");
+
+friends.forEach(friend => {
+    friend.addEventListener("click", () => {
+        const name = friend.dataset.name;
+
+        /* remove active from all */
+        friends.forEach(f => f.classList.remove("active"));
+
+        /* add active to clicked */
+        friend.classList.add("active");
+
+        /* update header */
+        chatHeader.textContent = name;
+
+        /* store current friend */
+        currentFriend = name;
+
+        /* load chat */
+        loadMessages(name);
+    });
+});
+
+
+/* LOAD MESSAGES */
+
+function loadMessages(friendName) {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
+
+    if (!chatData[friendName]) return;
+
+    chatData[friendName].forEach((msg, index) => {
+        const prevMsg = chatData[friendName][index - 1];
+
+        // --- SHOW TIME IF DIFFERENT MINUTE ---
+        if (!prevMsg || isDifferentMinute(prevMsg.time, msg.time)) {
+            const timeDiv = document.createElement("div");
+            timeDiv.classList.add("msg-time");
+            timeDiv.classList.add(msg.type === "me" ? "time-me" : "time-other");
+            timeDiv.textContent = formatTime(msg.time);
+            container.appendChild(timeDiv);
+        }
+
+        // --- REPLY BANNER ---
+        if (msg.reply) {
+            const replyDiv = document.createElement("div");
+            replyDiv.classList.add("reply-banner");
+            if (msg.type === "me") replyDiv.classList.add("me");
+
+            const arrow = msg.type === "me" ? "➥" : "➦";
+            replyDiv.innerHTML = `
+                <span class="reply-sender">${msg.reply.sender}:</span>
+                <span class="reply-text" title="${msg.reply.text}">${msg.reply.text}</span>
+                <span class="reply-arrow">${arrow}</span>
+            `;
+
+            // --- CLICK EVENT TO HIGHLIGHT EXACT MESSAGE ---
+            replyDiv.addEventListener("click", () => {
+                const rows = container.querySelectorAll(".message");
+                const repliedId = msg.reply.id; // the ID of the original message
+
+                rows.forEach(row => {
+                    if (parseInt(row.dataset.id) === repliedId) {
+                        row.classList.add("highlight");
+                        setTimeout(() => row.classList.remove("highlight"), 2000);
+                        row.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                });
+            });
+
+            container.appendChild(replyDiv);
+        }
+
+        // --- MESSAGE ROW ---
+        const row = document.createElement("div");
+        row.classList.add("message-row");
+        row.classList.add(msg.type === "me" ? "me-row" : "other-row");
+
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", msg.type);
+        messageDiv.dataset.id = msg.id; // store the unique ID
+
+        if (msg.deleted) messageDiv.classList.add("deleted");
+        messageDiv.innerHTML = msg.text;
+
+        if (msg.edited) {
+            messageDiv.innerHTML += `<span class="edited-label">(edited)</span>`;
+        }
+
+        // --- ACTION BUTTONS ---
+        const actions = document.createElement("div");
+        actions.classList.add("msg-actions");
+
+        let buttons = `<button onclick="replyMessage(${index})">↩</button>`;
+        if (msg.type === "me" && !msg.deleted) {
+            buttons += `
+                <button onclick="editMessage(${index})">✏</button>
+                <button onclick="deleteMessage(${index})">🗑</button>
+            `;
+        }
+        actions.innerHTML = buttons;
+
+        // Append in correct order
+        if (msg.type === "me") {
+            row.appendChild(actions);
+            row.appendChild(messageDiv);
+        } else {
+            row.appendChild(messageDiv);
+            row.appendChild(actions);
+        }
+
+        container.appendChild(row);
+    });
+}
+
+let editingIndex = null;
+let replyIndex = null;
+
+/* SEND MESSAGE */
+
+// Utility to generate unique IDs
+function generateMessageId() {
+    return 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+}
+
+// Updated sendMessage()
+function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text || !currentFriend) return;
+
+    const container = document.getElementById("messages");
+
+    /* EDIT MODE */
+    if (editingIndex !== null) {
+        chatData[currentFriend][editingIndex].text = text;
+        chatData[currentFriend][editingIndex].edited = true; 
+        editingIndex = null;
+        sendButton.textContent = "Send";
+        chatInput.value = "";
+        loadMessages(currentFriend);
+        return; // No scroll when editing
+    }
+
+    /* NORMAL SEND */
+    const newMsg = createMessage(
+        "me",
+        text,
+        replyIndex !== null
+            ? {
+                  id: chatData[currentFriend][replyIndex].id,  // store original message ID
+                  text: chatData[currentFriend][replyIndex].text,
+                  sender: chatData[currentFriend][replyIndex].type === "me" ? "you" : currentFriend
+              }
+            : null
+    );
+
+    /* add message */
+    chatData[currentFriend].push(newMsg);
+
+    /* clear input and reply */
+    chatInput.value = "";
+    replyIndex = null;
+    cancelReply();
+
+    /* reload chat */
+    loadMessages(currentFriend);
+
+    // Scroll to bottom smoothly
+    container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+    });
+}
+
+function editMessage(index){
+
+const msg = chatData[currentFriend][index];
+
+chatInput.value = msg.text;
+
+editingIndex = index;
+
+sendButton.textContent = "Edit";
+
+chatInput.focus();
+
+}
+
+function deleteMessage(index){
+
+const msg = chatData[currentFriend][index];
+
+msg.text = "You have deleted this message";
+msg.deleted = true;
+
+loadMessages(currentFriend);
+
+}
+
+function replyMessage(index){
+    replyIndex = index;
+
+    const msg = chatData[currentFriend][index];
+
+    const preview = document.getElementById("replyPreview");
+    const replyText = document.getElementById("replyText");
+    const replySender = document.getElementById("replySender");
+
+    // Set original message
+    replyText.textContent = msg.text;
+
+    // Set sender below
+    replySender.textContent = msg.type === "me" ? "(sended by you)" : `(sended by ${currentFriend})`;
+
+    preview.classList.add("show");
+    chatInput.focus();
+}
+
+function cancelReply(){
+
+replyIndex = null;
+
+document.getElementById("replyPreview").classList.remove("show");
+
+}
+
+/* SEND BUTTON */
+
+sendButton.addEventListener("click", sendMessage);
+
+
+/* ENTER KEY SEND */
+
+chatInput.addEventListener("keypress", function(e){
+
+if(e.key === "Enter"){
+sendMessage();
+}
+
+});
+
+function formatTime(timestamp){
+
+const d=new Date(timestamp);
+
+let hours=d.getHours();
+let minutes=d.getMinutes();
+
+const ampm=hours>=12?"pm":"am";
+
+hours=hours%12;
+if(hours===0) hours=12;
+
+minutes=minutes.toString().padStart(2,"0");
+
+return `${hours}:${minutes}${ampm}`;
+
+}
+
+
+function isDifferentMinute(t1,t2){
+
+const a=new Date(t1);
+const b=new Date(t2);
+
+return a.getHours()!==b.getHours() ||
+       a.getMinutes()!==b.getMinutes();
+
+}
+
+// FRIEND STAR TOGGLE
+const friendStar = document.querySelector(".friend-star");
+const panelTitle = document.querySelector(".panel-title");
+const friendsList = document.querySelector(".friends-list");
+const friendRequestsList = document.querySelector(".friend-requests-list");
+
+let showingRequests = false;
+
+friendStar.addEventListener("click", () => {
+    showingRequests = !showingRequests;
+
+    if (showingRequests) {
+        panelTitle.textContent = "Friend Requests";
+        friendsList.style.display = "none";
+        friendRequestsList.style.display = "flex"; // show friend requests
+    } else {
+        panelTitle.textContent = "Friends";
+        friendsList.style.display = "flex";
+        friendRequestsList.style.display = "none";
+    }
+});
+
+
+
+friendRequestsList.addEventListener("click", async (e) => {
+    const item = e.target.closest(".friend-request-item");
+    if (!item) return;
+
+    const requestId = item.dataset.id;
+    let action = '';
+
+    if (e.target.classList.contains("accept-btn")) {
+        action = 'accept';
+    } else if (e.target.classList.contains("reject-btn")) {
+        action = 'reject';
+    } else return;
+
+    // send AJAX to backend
+    const res = await fetch(`/friend-request/respond/${requestId}/${action}/`, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
+    if (res.ok) {
+        alert(`${action === 'accept' ? 'Accepted' : 'Rejected'} friend request`);
+        item.remove(); // remove from requests
+    }
 });
 
 </script>

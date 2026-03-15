@@ -123,3 +123,75 @@ def admin_page_view(request):
         return redirect('home')
 
     return render(request, 'accounts/admin.html')
+
+# accounts/views.py (friends section)
+from django.shortcuts import get_object_or_404
+from .models import CustomUser, FriendRequest, Friendship
+from django.http import JsonResponse
+
+def send_friend_request(request, user_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Login required'}, status=403)
+
+    to_user = get_object_or_404(CustomUser, id=user_id)
+
+    # Prevent sending to self
+    if request.user == to_user:
+        return JsonResponse({'error': 'Cannot send request to yourself'}, status=400)
+
+    # Check if request already exists
+    fr, created = FriendRequest.objects.get_or_create(from_user=request.user, to_user=to_user)
+    if not created:
+        return JsonResponse({'error': 'Request already sent'}, status=400)
+
+    return JsonResponse({'success': f'Request sent to {to_user.gamer_name}'})
+
+
+def respond_friend_request(request, request_id, action):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Login required'}, status=403)
+
+    fr = get_object_or_404(FriendRequest, id=request_id, to_user=request.user)
+
+    if action == 'accept':
+        fr.accepted = True
+        fr.save()
+
+        # Create friendship (user1 <-> user2)
+        Friendship.objects.get_or_create(user1=fr.from_user, user2=fr.to_user)
+        Friendship.objects.get_or_create(user1=fr.to_user, user2=fr.from_user)
+
+        return JsonResponse({'success': f'You are now friends with {fr.from_user.gamer_name}'})
+
+    elif action == 'reject':
+        fr.delete()
+        return JsonResponse({'success': 'Friend request rejected'})
+
+    else:
+        return JsonResponse({'error': 'Invalid action'}, status=400)
+
+
+@login_required
+def friends_list_view(request):
+    user = request.user
+
+    # Friends = accepted requests where user is from_user or to_user
+    friends_qs = FriendRequest.objects.filter(
+        (models.Q(from_user=user) | models.Q(to_user=user)) & models.Q(accepted=True)
+    )
+
+    friends = []
+    for fr in friends_qs:
+        friend_user = fr.to_user if fr.from_user == user else fr.from_user
+        friends.append({
+            'name': friend_user.gamer_name,
+            'online': friend_user.is_online
+        })
+
+    # Pending friend requests received by the user
+    pending_requests = FriendRequest.objects.filter(to_user=user, accepted__isnull=True)
+
+    return render(request, 'accounts/friends.html', {
+        'friends': friends,
+        'pending_requests': pending_requests
+    })
