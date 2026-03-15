@@ -1405,55 +1405,56 @@ background:#ff3b3b;
 
 <div class="friends-panel" id="friendsPanel">
 
-<div class="panel-close" onclick="closeFriendsPanel()">✕</div>
+    <div class="panel-close" onclick="closeFriendsPanel()">✕</div>
 
-<div class="frame-border">
+    <div class="frame-border">
 
-<!-- LEFT SIDEBAR -->
-<div class="friends-sidebar">
+        <!-- LEFT SIDEBAR -->
+        <div class="friends-sidebar">
 
-<div class="panel-title-container">
-    <div class="panel-title">Friends</div>
-    <span class="friend-star">*</span>
-</div>
+            <div class="panel-title-container">
+                <div class="panel-title">Friends</div>
+                <span class="friend-star">*</span>
+            </div>
 
-<input class="search-box" placeholder="Search">
+            <!-- SEARCH BOX -->
+            <input class="search-box" placeholder="Search">
 
-<!-- FRIENDS LIST -->
-<div class="friends-list">
-{% for f in friends %}
-<div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
-    <div class="avatar"></div>
-    <div class="friend-name">{{ f.name }}</div>
-</div>
-{% empty %}
-<div style="padding:4px;">No friends yet.</div>
-{% endfor %}
-</div>
+            <!-- FRIENDS LIST -->
+            <div class="friends-list">
+                {% for f in friends %}
+                <div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
+                    <div class="avatar"></div>
+                    <div class="friend-name">{{ f.name }}</div>
+                </div>
+                {% empty %}
+                <div style="padding:4px;">No friends yet.</div>
+                {% endfor %}
+            </div>
 
-<!-- FRIEND REQUESTS LIST -->
-<div class="friend-requests-list" style="display:none; flex-direction: column; gap: 4px; padding:6px 4px; border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
-{% for req in pending_requests %}
-<div class="friend-request-item" data-name="Dave" data-request-id="{{ fr.id }}">
-    <div class="friend-name">{{ req.from_user.gamer_name }}</div>
-    <div class="request-actions">
-        <button class="accept-btn">✔</button>
-        <button class="reject-btn">✖</button>
+            <!-- FRIEND REQUESTS LIST -->
+            <div class="friend-requests-list" style="display:none; flex-direction: column; gap: 4px; padding:6px 4px; border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
+                {% for req in pending_requests %}
+                <div class="friend-request-item" data-id="{{ req.id }}">
+                    <div class="friend-name">{{ req.from_user.gamer_name }}</div>
+                    <div class="request-actions">
+                        <button class="accept-btn">✔</button>
+                        <button class="reject-btn">✖</button>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="padding:4px;">No pending requests.</div>
+                {% endfor %}
+            </div>
+
+            <!-- ADD FRIEND (optional, can hide if using search suggestions only) -->
+            <div class="add-friend">
+                <input placeholder="Player Name">
+                <button>Add Friend</button>
+            </div>
+
+        </div>
     </div>
-</div>
-{% empty %}
-<div style="padding:4px;">No pending requests.</div>
-{% endfor %}
-</div>
-
-<div class="add-friend">
-
-<input placeholder="Player Name">
-
-<button>Add Friend</button>
-
-</div>
-
 </div>
 
 <!-- CHAT AREA -->
