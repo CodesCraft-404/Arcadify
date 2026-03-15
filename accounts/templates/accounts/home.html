@@ -1292,24 +1292,6 @@ background:#ff3b3b;
 .request-actions button:hover {
     background: #4f46e5;
 }
-
-.suggestions-dropdown {
-    position: absolute;
-    background: #222;
-    color: #fff;
-    border: 1px solid #555;
-    max-height: 150px;
-    overflow-y: auto;
-    width: 100%;
-    z-index: 100;
-}
-.suggestion-item {
-    padding: 4px 8px;
-    cursor: pointer;
-}
-.suggestion-item:hover {
-    background: #555;
-}
 </style>
 </head>
 <body>
@@ -1405,55 +1387,56 @@ background:#ff3b3b;
 
 <div class="friends-panel" id="friendsPanel">
 
-    <div class="panel-close" onclick="closeFriendsPanel()">✕</div>
+<div class="panel-close" onclick="closeFriendsPanel()">✕</div>
 
-    <div class="frame-border">
+<div class="frame-border">
 
-        <!-- LEFT SIDEBAR -->
-        <div class="friends-sidebar">
+<!-- LEFT SIDEBAR -->
+<div class="friends-sidebar">
 
-            <div class="panel-title-container">
-                <div class="panel-title">Friends</div>
-                <span class="friend-star">*</span>
-            </div>
+<div class="panel-title-container">
+    <div class="panel-title">Friends</div>
+    <span class="friend-star">⭐</span>
+</div>
 
-            <!-- SEARCH BOX -->
-            <input class="search-box" placeholder="Search">
+<input class="search-box" placeholder="Search">
 
-            <!-- FRIENDS LIST -->
-            <div class="friends-list">
-                {% for f in friends %}
-                <div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
-                    <div class="avatar"></div>
-                    <div class="friend-name">{{ f.name }}</div>
-                </div>
-                {% empty %}
-                <div style="padding:4px;">No friends yet.</div>
-                {% endfor %}
-            </div>
+<!-- FRIENDS LIST -->
+<div class="friends-list">
+{% for f in friends %}
+<div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
+    <div class="avatar"></div>
+    <div class="friend-name">{{ f.name }}</div>
+</div>
+{% empty %}
+<div style="padding:4px;">No friends yet.</div>
+{% endfor %}
+</div>
 
-            <!-- FRIEND REQUESTS LIST -->
-            <div class="friend-requests-list" style="display:none; flex-direction: column; gap: 4px; padding:6px 4px; border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
-                {% for req in pending_requests %}
-                <div class="friend-request-item" data-id="{{ req.id }}">
-                    <div class="friend-name">{{ req.from_user.gamer_name }}</div>
-                    <div class="request-actions">
-                        <button class="accept-btn">✔</button>
-                        <button class="reject-btn">✖</button>
-                    </div>
-                </div>
-                {% empty %}
-                <div style="padding:4px;">No pending requests.</div>
-                {% endfor %}
-            </div>
+<!-- FRIEND REQUESTS LIST -->
+<div class="friend-requests-list" style="display:none; flex-direction: column; gap: 4px; padding:6px 4px; border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
+{% for req in pending_requests %}
+<div class="friend-request-item" data-id="{{ req.id }}" data-name="{{ req.from_user.gamer_name }}">
+    <div class="friend-name">{{ req.from_user.gamer_name }}</div>
+    <div class="request-actions">
+        <button class="accept-btn">✔</button>
+        <button class="reject-btn">✖</button>
+    </div>
+</div>
+{% empty %}
+<div style="padding:4px;">No pending requests.</div>
+{% endfor %}
+</div>
 
-            <!-- ADD FRIEND (optional, can hide if using search suggestions only) -->
-            <div class="add-friend">
-                <input placeholder="Player Name">
-                <button>Add Friend</button>
-            </div>
+<div class="add-friend">
 
-        </div>
+<input placeholder="Player Name">
+
+<button>Add Friend</button>
+
+</div>
+
+</div>
 
 <!-- CHAT AREA -->
 <div class="chat-area">
@@ -1945,7 +1928,7 @@ return a.getHours()!==b.getHours() ||
 
 }
 
-// ===== FRIEND STAR TOGGLE =====
+// FRIEND STAR TOGGLE
 const friendStar = document.querySelector(".friend-star");
 const panelTitle = document.querySelector(".panel-title");
 const friendsList = document.querySelector(".friends-list");
@@ -1959,7 +1942,7 @@ friendStar.addEventListener("click", () => {
     if (showingRequests) {
         panelTitle.textContent = "Friend Requests";
         friendsList.style.display = "none";
-        friendRequestsList.style.display = "flex";
+        friendRequestsList.style.display = "flex"; // show friend requests
     } else {
         panelTitle.textContent = "Friends";
         friendsList.style.display = "flex";
@@ -1967,150 +1950,25 @@ friendStar.addEventListener("click", () => {
     }
 });
 
-// ===== FETCH & RENDER FRIENDS PANEL =====
-function loadFriendsPanel() {
-    fetch("{% url 'get_friends_ajax' %}")
-        .then(res => res.json())
-        .then(data => {
-            // --- Friends List ---
-            friendsList.innerHTML = '';
-            data.friends.forEach(friend => {
-                const div = document.createElement('div');
-                div.classList.add('friend-item');
-                div.classList.add(friend.online ? 'online' : 'offline');
-                div.dataset.name = friend.name;
-                div.innerHTML = `<div class="avatar"></div><div class="friend-name">${friend.name}</div>`;
-                friendsList.appendChild(div);
-            });
 
-            // --- Pending Requests ---
-            friendRequestsList.innerHTML = '';
-            data.pending_requests.forEach(fr => {
-                const div = document.createElement('div');
-                div.classList.add('friend-request-item');
-                div.dataset.id = fr.id;
-                div.innerHTML = `
-                    <div class="friend-name">${fr.name}</div>
-                    <div class="request-actions">
-                        <button class="accept-btn">✔</button>
-                        <button class="reject-btn">✖</button>
-                    </div>
-                `;
-                friendRequestsList.appendChild(div);
-            });
-        })
-        .catch(err => console.error("Error loading friends panel:", err));
-}
 
-const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-// ===== ACCEPT/REJECT BUTTON LISTENER =====
 friendRequestsList.addEventListener("click", (e) => {
     const item = e.target.closest(".friend-request-item");
     if (!item) return;
 
-    const requestId = item.dataset.id;
-    let action = '';
-    if (e.target.classList.contains("accept-btn")) action = 'accept';
-    if (e.target.classList.contains("reject-btn")) action = 'reject';
-    if (!action) return;
+    const name = item.dataset.name;
 
-    fetch("{% url 'respond_friend_request_ajax' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRFToken": csrfToken
-        },
-        body: `request_id=${requestId}&action=${action}`
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            loadFriendsPanel();  // refresh lists
-            if (!showingRequests) {
-                // optional: show success toast if viewing friends
-                console.log(data.success);
-            }
-        } else {
-            alert(data.error);
-        }
-    });
-});
-
-// ===== INITIAL LOAD & AUTO REFRESH =====
-loadFriendsPanel();
-setInterval(loadFriendsPanel, 15000);
-
-// ===== SEARCH & ADD FRIENDS =====
-const searchBox = document.querySelector(".add-friend input");
-let suggestionsContainer = null;
-
-searchBox.addEventListener("input", () => {
-    const query = searchBox.value.trim();
-    if (!query) {
-        if (suggestionsContainer) suggestionsContainer?.remove();
-        return;
+    if (e.target.classList.contains("accept-btn")) {
+        alert(`Accepted friend request from ${name}`);
+        // move to friends list if needed
+        item.remove();
+    } else if (e.target.classList.contains("reject-btn")) {
+        alert(`Rejected friend request from ${name}`);
+        item.remove();
     }
-
-    fetch(`{% url 'search_users_ajax' %}?q=${encodeURIComponent(query)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!suggestionsContainer) {
-                suggestionsContainer = document.createElement('div');
-                suggestionsContainer.classList.add('suggestions-dropdown');
-                searchBox.parentNode.appendChild(suggestionsContainer);
-            }
-            suggestionsContainer.innerHTML = '';
-            if (data.results.length === 0) {
-                suggestionsContainer.style.display = 'none';
-                return;
-            }
-            suggestionsContainer.style.display = 'block';
-            data.results.forEach(user => {
-                const div = document.createElement('div');
-                div.classList.add('suggestion-item');
-                div.textContent = user.name;
-                div.dataset.userId = user.id;
-                div.addEventListener('click', () => {
-                    sendFriendRequest(user.id, user.name);
-                    searchBox.value = '';
-                    suggestionsContainer.style.display = 'none';
-                });
-                suggestionsContainer.appendChild(div);
-            });
-        });
 });
 
-// ===== SEND FRIEND REQUEST FUNCTION =====
-function sendFriendRequest(userId, userName) {
-    fetch("{% url 'send_friend_request_ajax' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRFToken": csrfToken
-        },
-        body: `user_id=${userId}`
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.success);
-            loadFriendsPanel(); // optional: refresh panel immediately
-        } else {
-            alert(data.error);
-        }
-    });
-}
 
-// ===== HELPER: ADD FRIEND DYNAMICALLY =====
-function addFriendToList(name, online=false) {
-    const div = document.createElement('div');
-    div.classList.add('friend-item');
-    div.classList.add(online ? 'online' : 'offline');
-    div.dataset.name = name;
-    div.innerHTML = `<div class="avatar"></div><div class="friend-name">${name}</div>`;
-    friendsList.appendChild(div);
-}
 </script>
 
 </body>
