@@ -185,16 +185,18 @@ def respond_friend_request_ajax(request):
 # ===== GET FRIENDS + PENDING REQUESTS (AJAX) =====
 @login_required
 def get_friends_ajax(request):
-    user = request.user
     try:
+        user = request.user
         friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
         friends = []
         for f in friends_qs:
             friend_user = f.user2 if f.user1 == user else f.user1
+            # fallback if is_online missing
+            online_status = getattr(friend_user, 'is_online', False)
             friends.append({
                 'id': friend_user.id,
                 'name': friend_user.gamer_name,
-                'online': getattr(friend_user, 'is_online', False)  # safe fallback
+                'online': online_status
             })
 
         pending_qs = FriendRequest.objects.filter(to_user=user, accepted=False)
@@ -205,27 +207,36 @@ def get_friends_ajax(request):
         import traceback
         print("Error in get_friends_ajax:", e)
         traceback.print_exc()
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'friends': [], 'pending_requests': []})
 
 
 # ===== SEARCH USERS (AJAX) =====
 @login_required
 def search_users_ajax(request):
-    query = request.GET.get('q', '').strip()
-    if not query:
+    try:
+        query = request.GET.get('q', '').strip()
+        if not query:
+            return JsonResponse({'results': []})
+
+        user = request.user
+        friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
+        friend_ids = set()
+        for f in friends_qs:
+            friend_ids.add(f.user1.id)
+            friend_ids.add(f.user2.id)
+        friend_ids.add(user.id)
+
+        users = CustomUser.objects.filter(
+            gamer_name__icontains=query
+        ).exclude(id__in=friend_ids)[:5]
+
+        results = [{'id': u.id, 'name': u.gamer_name} for u in users]
+        return JsonResponse({'results': results})
+    except Exception as e:
+        import traceback
+        print("Error in search_users_ajax:", e)
+        traceback.print_exc()
         return JsonResponse({'results': []})
-
-    user = request.user
-    # Exclude self and existing friends
-    friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
-    friend_ids = {f.user1.id for f in friends_qs} | {f.user2.id for f in friends_qs} | {user.id}
-
-    users = CustomUser.objects.filter(
-        gamer_name__icontains=query
-    ).exclude(id__in=friend_ids)[:5]
-
-    results = [{'id': u.id, 'name': u.gamer_name} for u in users]
-    return JsonResponse({'results': results})
 
 
 # ===== OPTIONAL: FRIENDS LIST PAGE (for template) =====
