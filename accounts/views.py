@@ -130,17 +130,25 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser, FriendRequest, Friendship
 from django.http import JsonResponse
 
-def send_friend_request(request, user_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Login required'}, status=403)
+# accounts/views.py (add these)
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt  # optional if using AJAX with CSRF token
 
-    to_user = get_object_or_404(CustomUser, id=user_id)
+@login_required
+@require_POST
+def send_friend_request_ajax(request):
+    user_id = request.POST.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'User ID required'}, status=400)
 
-    # Prevent sending to self
-    if request.user == to_user:
+    try:
+        to_user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    if to_user == request.user:
         return JsonResponse({'error': 'Cannot send request to yourself'}, status=400)
 
-    # Check if request already exists
     fr, created = FriendRequest.objects.get_or_create(from_user=request.user, to_user=to_user)
     if not created:
         return JsonResponse({'error': 'Request already sent'}, status=400)
@@ -148,29 +156,33 @@ def send_friend_request(request, user_id):
     return JsonResponse({'success': f'Request sent to {to_user.gamer_name}'})
 
 
-def respond_friend_request(request, request_id, action):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Login required'}, status=403)
+@login_required
+@require_POST
+def respond_friend_request_ajax(request):
+    request_id = request.POST.get('request_id')
+    action = request.POST.get('action')
 
-    fr = get_object_or_404(FriendRequest, id=request_id, to_user=request.user)
+    if not request_id or action not in ['accept', 'reject']:
+        return JsonResponse({'error': 'Invalid parameters'}, status=400)
+
+    try:
+        fr = FriendRequest.objects.get(id=request_id, to_user=request.user)
+    except FriendRequest.DoesNotExist:
+        return JsonResponse({'error': 'Friend request not found'}, status=404)
 
     if action == 'accept':
         fr.accepted = True
         fr.save()
 
-        # Create friendship (user1 <-> user2)
+        # create bidirectional friendship
         Friendship.objects.get_or_create(user1=fr.from_user, user2=fr.to_user)
         Friendship.objects.get_or_create(user1=fr.to_user, user2=fr.from_user)
 
         return JsonResponse({'success': f'You are now friends with {fr.from_user.gamer_name}'})
 
-    elif action == 'reject':
+    else:  # reject
         fr.delete()
         return JsonResponse({'success': 'Friend request rejected'})
-
-    else:
-        return JsonResponse({'error': 'Invalid action'}, status=400)
-
 
 @login_required
 def friends_list_view(request):
@@ -196,3 +208,76 @@ def friends_list_view(request):
         'friends': friends,
         'pending_requests': pending_requests
     })
+
+# accounts/views.py
+from django.db.models import Q
+
+@login_required
+def search_users_ajax(request):
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+
+    # exclude yourself and already friends
+    user = request.user
+    # Get existing friends
+    friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
+    friend_ids = set()
+    for f in friends_qs:
+        friend_ids.add(f.user1.id)
+        friend_ids.add(f.user2.id)
+    friend_ids.add(user.id)  # exclude yourself
+
+    # Search users excluding self and friends
+    users = CustomUser.objects.filter(
+        gamer_name__icontains=query
+    ).exclude(id__in=friend_ids)[:5]  # limit suggestions
+
+    results = [{'id': u.id, 'name': u.gamer_name} for u in users]
+    return JsonResponse({'results': results})
+
+# accounts/views.py
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def get_friends_ajax(request):
+    user = request.user
+
+    # Get friends
+    friends_qs = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
+    friends = []
+    for f in friends_qs:
+        friend_user = f.user2 if f.user1 == user else f.user1
+        friends.append({
+            'id': friend_user.id,
+            'name': friend_user.gamer_name,
+            'online': friend_user.is_online
+        })
+
+    # Pending friend requests
+    pending_qs = FriendRequest.objects.filter(to_user=user, accepted__isnull=True)
+    pending_requests = [{'id': fr.id, 'name': fr.from_user.gamer_name} for fr in pending_qs]
+
+    return JsonResponse({'friends': friends, 'pending_requests': pending_requests})
+
+@login_required
+def respond_friend_request_ajax(request):
+    fr_id = request.POST.get('request_id')
+    action = request.POST.get('action')
+
+    if not fr_id or not action:
+        return JsonResponse({'error': 'Invalid parameters'}, status=400)
+
+    fr = get_object_or_404(FriendRequest, id=fr_id, to_user=request.user)
+
+    if action == 'accept':
+        fr.accepted = True
+        fr.save()
+        Friendship.objects.get_or_create(user1=fr.from_user, user2=fr.to_user)
+        Friendship.objects.get_or_create(user1=fr.to_user, user2=fr.from_user)
+        return JsonResponse({'success': f'You are now friends with {fr.from_user.gamer_name}'})
+    elif action == 'reject':
+        fr.delete()
+        return JsonResponse({'success': 'Friend request rejected'})
+    else:
+        return JsonResponse({'error': 'Invalid action'}, status=400)
