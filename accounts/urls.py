@@ -10,12 +10,8 @@ urlpatterns = [
 
     # Friends system
     path('friends/', views.friends_list_view, name='friends_list'),
-       # AJAX friends URLs
+    path('friends/ajax/', views.get_friends_ajax, name='get_friends_ajax'),
     path('friends/send/', views.send_friend_request_ajax, name='send_friend_request_ajax'),
     path('friends/respond/', views.respond_friend_request_ajax, name='respond_friend_request_ajax'),
-    # accounts/urls.py
     path('friends/search/', views.search_users_ajax, name='search_users_ajax'),
-    # accounts/urls.py
-    path('friends/ajax/', views.get_friends_ajax, name='get_friends_ajax'),
-    path('friends/respond/', views.respond_friend_request_ajax, name='respond_friend_request_ajax'),
 ]

@@ -79,5 +79,11 @@ class Friendship(models.Model):
     class Meta:
         unique_together = ('user1', 'user2')  # prevent duplicate friendships
 
+    def save(self, *args, **kwargs):
+        # enforce user1.id < user2.id to ensure uniqueness for bidirectional friendship
+        if self.user1.id > self.user2.id:
+            self.user1, self.user2 = self.user2, self.user1
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.user1.gamer_name} ↔ {self.user2.gamer_name}"

@@ -1946,7 +1946,7 @@ return a.getHours()!==b.getHours() ||
 
 }
 
-// FRIEND STAR TOGGLE
+// ===== FRIEND STAR TOGGLE =====
 const friendStar = document.querySelector(".friend-star");
 const panelTitle = document.querySelector(".panel-title");
 const friendsList = document.querySelector(".friends-list");
@@ -1960,7 +1960,7 @@ friendStar.addEventListener("click", () => {
     if (showingRequests) {
         panelTitle.textContent = "Friend Requests";
         friendsList.style.display = "none";
-        friendRequestsList.style.display = "flex"; // show friend requests
+        friendRequestsList.style.display = "flex";
     } else {
         panelTitle.textContent = "Friends";
         friendsList.style.display = "flex";
@@ -1968,44 +1968,44 @@ friendStar.addEventListener("click", () => {
     }
 });
 
-
-// Fetch and render friends + pending requests
+// ===== FETCH & RENDER FRIENDS PANEL =====
 function loadFriendsPanel() {
     fetch("{% url 'get_friends_ajax' %}")
-    .then(res => res.json())
-    .then(data => {
-        // --- Friends List ---
-        friendsList.innerHTML = '';
-        data.friends.forEach(friend => {
-            const div = document.createElement('div');
-            div.classList.add('friend-item');
-            div.classList.add(friend.online ? 'online' : 'offline');
-            div.dataset.name = friend.name;
-            div.innerHTML = `<div class="avatar"></div><div class="friend-name">${friend.name}</div>`;
-            friendsList.appendChild(div);
-        });
+        .then(res => res.json())
+        .then(data => {
+            // --- Friends List ---
+            friendsList.innerHTML = '';
+            data.friends.forEach(friend => {
+                const div = document.createElement('div');
+                div.classList.add('friend-item');
+                div.classList.add(friend.online ? 'online' : 'offline');
+                div.dataset.name = friend.name;
+                div.innerHTML = `<div class="avatar"></div><div class="friend-name">${friend.name}</div>`;
+                friendsList.appendChild(div);
+            });
 
-        // --- Pending Friend Requests ---
-        friendRequestsList.innerHTML = '';
-        data.pending_requests.forEach(fr => {
-            const div = document.createElement('div');
-            div.classList.add('friend-request-item');
-            div.dataset.id = fr.id;
-            div.innerHTML = `
-                <div class="friend-name">${fr.name}</div>
-                <div class="request-actions">
-                    <button class="accept-btn">✔</button>
-                    <button class="reject-btn">✖</button>
-                </div>
-            `;
-            friendRequestsList.appendChild(div);
-        });
-    });
+            // --- Pending Requests ---
+            friendRequestsList.innerHTML = '';
+            data.pending_requests.forEach(fr => {
+                const div = document.createElement('div');
+                div.classList.add('friend-request-item');
+                div.dataset.id = fr.id;
+                div.innerHTML = `
+                    <div class="friend-name">${fr.name}</div>
+                    <div class="request-actions">
+                        <button class="accept-btn">✔</button>
+                        <button class="reject-btn">✖</button>
+                    </div>
+                `;
+                friendRequestsList.appendChild(div);
+            });
+        })
+        .catch(err => console.error("Error loading friends panel:", err));
 }
 
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-// Accept/Reject button listener (delegated)
+// ===== ACCEPT/REJECT BUTTON LISTENER =====
 friendRequestsList.addEventListener("click", (e) => {
     const item = e.target.closest(".friend-request-item");
     if (!item) return;
@@ -2028,62 +2028,28 @@ friendRequestsList.addEventListener("click", (e) => {
     .then(data => {
         if (data.success) {
             loadFriendsPanel();  // refresh lists
+            if (!showingRequests) {
+                // optional: show success toast if viewing friends
+                console.log(data.success);
+            }
         } else {
             alert(data.error);
         }
     });
 });
 
-// Initial load
+// ===== INITIAL LOAD & AUTO REFRESH =====
 loadFriendsPanel();
-
-// Optional: refresh every 15s
 setInterval(loadFriendsPanel, 15000);
 
-// Send friend request dynamically
-document.querySelector(".add-friend button").addEventListener("click", () => {
-    const input = document.querySelector(".add-friend input");
-    const username = input.value.trim();
-    if (!username) return;
-
-    fetch("{% url 'send_friend_request_ajax' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRFToken": csrfToken
-        },
-        body: `user_id=${username}` // you might need to map gamer_name -> user_id
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.success);
-            input.value = '';
-        } else {
-            alert(data.error);
-        }
-    });
-});
-
-// Helper: add new friend to friends list dynamically
-function addFriendToList(name, online=false) {
-    const div = document.createElement('div');
-    div.classList.add('friend-item');
-    div.classList.add(online ? 'online' : 'offline');
-    div.dataset.name = name;
-    div.innerHTML = `
-        <div class="avatar"></div>
-        <div class="friend-name">${name}</div>
-    `;
-    friendsList.appendChild(div);
-}
+// ===== SEARCH & ADD FRIENDS =====
 const searchBox = document.querySelector(".add-friend input");
 let suggestionsContainer = null;
 
 searchBox.addEventListener("input", () => {
     const query = searchBox.value.trim();
     if (!query) {
-        if (suggestionsContainer) suggestionsContainer.remove();
+        if (suggestionsContainer) suggestionsContainer?.remove();
         return;
     }
 
@@ -2116,7 +2082,7 @@ searchBox.addEventListener("input", () => {
         });
 });
 
-// Function to send friend request dynamically
+// ===== SEND FRIEND REQUEST FUNCTION =====
 function sendFriendRequest(userId, userName) {
     fetch("{% url 'send_friend_request_ajax' %}", {
         method: "POST",
@@ -2130,10 +2096,21 @@ function sendFriendRequest(userId, userName) {
     .then(data => {
         if (data.success) {
             alert(data.success);
+            loadFriendsPanel(); // optional: refresh panel immediately
         } else {
             alert(data.error);
         }
     });
+}
+
+// ===== HELPER: ADD FRIEND DYNAMICALLY =====
+function addFriendToList(name, online=false) {
+    const div = document.createElement('div');
+    div.classList.add('friend-item');
+    div.classList.add(online ? 'online' : 'offline');
+    div.dataset.name = name;
+    div.innerHTML = `<div class="avatar"></div><div class="friend-name">${name}</div>`;
+    friendsList.appendChild(div);
 }
 </script>
 
