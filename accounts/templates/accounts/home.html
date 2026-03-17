@@ -2169,8 +2169,14 @@ document.addEventListener("click", (e) => {
 });
 
 document.getElementById("addFriendBtn").addEventListener("click", async () => {
-    const inputName = input.value.trim();
-    if (!inputName) return;
+    const name = document.getElementById("addFriendInput").value.trim();
+    if (!name) return;
+
+    const selectedUser = window.selectedUser;
+    if (!selectedUser) {
+        showNotification("Select a valid user", "error");
+        return;
+    }
 
     try {
         const res = await fetch("/send-request/", {
@@ -2179,7 +2185,7 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "X-CSRFToken": getCSRFToken()
             },
-            body: `username=${encodeURIComponent(inputName)}`
+            body: `user_id=${selectedUser.id}`
         });
 
         const data = await res.json();
@@ -2188,21 +2194,15 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
             showNotification(`You are already friends with ${data.name}`, "info");
         } else if (data.status === "already_sent") {
             showNotification(`You already sent a friend request to ${data.name}`, "info");
-        } else if (data.status === "invalid_user") {
-            showNotification("Invalid username or this player has not played yet", "error");
         } else if (data.success) {
-            showNotification(data.message, "success");
-            input.value = "";
-            window.selectedUser = null;
-        } else if (data.status === "self_request") {
-            showNotification("You cannot send a friend request to yourself", "error");
-        } else {
-            showNotification(data.error || "Something went wrong", "error");
+            showNotification(data.message || `Friend request sent to ${selectedUser.gamer_name}`, "success");
+        } else if (data.error) {
+            showNotification(data.error, "error");
         }
 
     } catch (err) {
-        console.error(err);
-        showNotification("Error sending friend request", "error");
+        console.error("Error sending friend request:", err);
+        showNotification("Something went wrong. Try again.", "error");
     }
 });
 
