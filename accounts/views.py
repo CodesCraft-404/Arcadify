@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import CustomUser
 import os
 from django.conf import settings
+from django.views.decorators.http import require_POST
 
 def login_register_view(request):
     if request.method == 'POST':
