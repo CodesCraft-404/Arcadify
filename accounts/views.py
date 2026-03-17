@@ -188,7 +188,7 @@ def send_friend_request(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"}, status=400)
 
-    to_username = request.POST.get("username")  # input from frontend
+    to_username = request.POST.get("username")  # changed to username input
 
     if not to_username:
         return JsonResponse({"error": "Missing username"}, status=400)
@@ -221,14 +221,7 @@ def send_friend_request(request):
     if reverse_request:
         reverse_request.status = 'accepted'
         reverse_request.save()
-        # ✅ Return extra fields for frontend to instantly add the friend
-        return JsonResponse({
-            "success": True,
-            "message": f"You are now friends with {to_user.gamer_name}!",
-            "friend_added": True,
-            "friend_name": to_user.gamer_name,
-            "friend_online": to_user.is_online
-        })
+        return JsonResponse({"success": True, "message": f"You are now friends with {to_user.gamer_name}!"})
 
     # Create new request
     FriendRequest.objects.create(from_user=request.user, to_user=to_user)
