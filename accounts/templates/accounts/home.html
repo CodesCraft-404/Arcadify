@@ -1471,13 +1471,15 @@ background:#ff3b3b;
 <!-- FRIENDS LIST -->
 <div class="friends-list">
 {% for f in friends %}
-<div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
+<div class="friend-item {% if f.is_online %}online{% else %}offline{% endif %}" data-name="{{ f.gamer_name }}">
     <div class="avatar"></div>
-    <div class="friend-name">{{ f.name }}</div>
+    <div class="friend-name">{{ f.gamer_name }}</div>
 </div>
-{% empty %}
-<div style="padding:4px;">No friends yet.</div>
 {% endfor %}
+
+{% if not friends %}
+<div class="no-friends">No friends yet.</div>
+{% endif %}
 </div>
 
 <!-- FRIEND REQUESTS LIST -->
