@@ -189,6 +189,9 @@ def search_players(request):
 
     return JsonResponse(data, safe=False)
 
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import CustomUser, FriendRequest
 from django.db import IntegrityError
 
 @login_required
@@ -204,36 +207,44 @@ def send_friend_request(request):
         except CustomUser.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
 
-        # 🚫 prevent sending to yourself
         if to_user == request.user:
             return JsonResponse({"error": "Cannot send request to yourself"}, status=400)
 
-        # 🔥 CHECK REVERSE REQUEST (SMART LOGIC)
+        # 1️⃣ Check if already friends
+        if FriendRequest.objects.filter(
+            Q(from_user=request.user, to_user=to_user, status='accepted') |
+            Q(from_user=to_user, to_user=request.user, status='accepted')
+        ).exists():
+            return JsonResponse({"status": "already_friend", "name": to_user.gamer_name})
+
+        # 2️⃣ Check if pending request already exists (sent by you)
+        if FriendRequest.objects.filter(
+            from_user=request.user, to_user=to_user, status='pending'
+        ).exists():
+            return JsonResponse({"status": "already_sent", "name": to_user.gamer_name})
+
+        # 3️⃣ Check if the other user sent you a pending request → auto-accept
         reverse_request = FriendRequest.objects.filter(
-            from_user=to_user,
-            to_user=request.user,
-            status='pending'
+            from_user=to_user, to_user=request.user, status='pending'
         ).first()
 
         if reverse_request:
             reverse_request.status = 'accepted'
             reverse_request.save()
-            return JsonResponse({"success": True, "message": "Friend added!"})
+            return JsonResponse({"success": True, "message": f"You are now friends with {to_user.gamer_name}!"})
 
-        # ✅ CREATE REQUEST (SAFE)
+        # ✅ Create new request
         try:
             FriendRequest.objects.create(
                 from_user=request.user,
                 to_user=to_user
             )
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "message": "Friend request sent ✅"})
 
         except IntegrityError:
             return JsonResponse({"error": "Request already exists"}, status=400)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
-from django.views.decorators.http import require_POST
 
 @require_POST
 @login_required
