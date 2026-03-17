@@ -155,13 +155,12 @@ from django.db.models import Q
 @login_required
 def search_players(request):
     query = request.GET.get('q', '').strip()
-
     if not query:
         return JsonResponse([], safe=False)
 
     user = request.user
 
-    # Users who are already friends
+    # Exclude yourself and already friends
     accepted_requests = FriendRequest.objects.filter(
         Q(from_user=user) | Q(to_user=user),
         status='accepted'
@@ -169,25 +168,14 @@ def search_players(request):
 
     friend_ids = set()
     for fr in accepted_requests:
-        if fr.from_user == user:
-            friend_ids.add(fr.to_user.id)
-        else:
-            friend_ids.add(fr.from_user.id)
+        friend_ids.add(fr.from_user.id)
+        friend_ids.add(fr.to_user.id)
 
-    # Final queryset: matching users excluding yourself and accepted friends
     users = CustomUser.objects.filter(
         gamer_name__icontains=query
-    ).exclude(
-        id=user.id
-    ).exclude(
-        id__in=friend_ids
-    )[:10]
+    ).exclude(id=user.id).exclude(id__in=friend_ids)[:10]
 
-    data = [
-        {"id": u.id, "gamer_name": u.gamer_name}
-        for u in users
-    ]
-
+    data = [{"id": u.id, "gamer_name": u.gamer_name} for u in users]
     return JsonResponse(data, safe=False)
 
 from django.http import JsonResponse
@@ -197,55 +185,47 @@ from django.db import IntegrityError
 
 @login_required
 def send_friend_request(request):
-    if request.method == "POST":
-        to_user_id = request.POST.get("user_id")
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
 
-        if not to_user_id:
-            return JsonResponse({"error": "Missing user_id"}, status=400)
+    to_username = request.POST.get("username")  # changed to username input
 
-        try:
-            to_user = CustomUser.objects.get(id=to_user_id)
-        except CustomUser.DoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
+    if not to_username:
+        return JsonResponse({"error": "Missing username"}, status=400)
 
-        if to_user == request.user:
-            return JsonResponse({"error": "Cannot send request to yourself"}, status=400)
+    try:
+        to_user = CustomUser.objects.get(gamer_name=to_username)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({"status": "invalid_user"}, status=404)
 
-        # 1️⃣ Check if already friends
-        if FriendRequest.objects.filter(
-            Q(from_user=request.user, to_user=to_user, status='accepted') |
-            Q(from_user=to_user, to_user=request.user, status='accepted')
-        ).exists():
-            return JsonResponse({"status": "already_friend", "name": to_user.gamer_name})
+    if to_user == request.user:
+        return JsonResponse({"status": "self_request"})
 
-        # 2️⃣ Check if pending request already exists (sent by you)
-        if FriendRequest.objects.filter(
-            from_user=request.user, to_user=to_user, status='pending'
-        ).exists():
-            return JsonResponse({"status": "already_sent", "name": to_user.gamer_name})
+    # Already friends
+    if FriendRequest.objects.filter(
+        Q(from_user=request.user, to_user=to_user, status='accepted') |
+        Q(from_user=to_user, to_user=request.user, status='accepted')
+    ).exists():
+        return JsonResponse({"status": "already_friend", "name": to_user.gamer_name})
 
-        # 3️⃣ Check if the other user sent you a pending request → auto-accept
-        reverse_request = FriendRequest.objects.filter(
-            from_user=to_user, to_user=request.user, status='pending'
-        ).first()
+    # Already sent pending request
+    if FriendRequest.objects.filter(
+        from_user=request.user, to_user=to_user, status='pending'
+    ).exists():
+        return JsonResponse({"status": "already_sent", "name": to_user.gamer_name})
 
-        if reverse_request:
-            reverse_request.status = 'accepted'
-            reverse_request.save()
-            return JsonResponse({"success": True, "message": f"You are now friends with {to_user.gamer_name}!"})
+    # Reverse pending request → auto-accept
+    reverse_request = FriendRequest.objects.filter(
+        from_user=to_user, to_user=request.user, status='pending'
+    ).first()
+    if reverse_request:
+        reverse_request.status = 'accepted'
+        reverse_request.save()
+        return JsonResponse({"success": True, "message": f"You are now friends with {to_user.gamer_name}!"})
 
-        # ✅ Create new request
-        try:
-            FriendRequest.objects.create(
-                from_user=request.user,
-                to_user=to_user
-            )
-            return JsonResponse({"success": True, "message": "Friend request sent ✅"})
-
-        except IntegrityError:
-            return JsonResponse({"error": "Request already exists"}, status=400)
-
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    # Create new request
+    FriendRequest.objects.create(from_user=request.user, to_user=to_user)
+    return JsonResponse({"success": True, "message": f"Friend request sent to {to_user.gamer_name}!"})
 
 @require_POST
 @login_required
