@@ -1,4 +1,4 @@
-# accounts/views.py
+﻿# accounts/views.py
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -123,3 +123,30 @@ def admin_page_view(request):
         return redirect('home')
 
     return render(request, 'accounts/admin.html')
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import CustomUser
+
+@login_required
+def search_players(request):
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        users = CustomUser.objects.filter(
+            gamer_name__icontains=query
+        ).exclude(
+            id=request.user.id   # 🚀 exclude yourself
+        )[:10]
+
+        data = [
+            {
+                "id": user.id,
+                "gamer_name": user.gamer_name
+            }
+            for user in users
+        ]
+    else:
+        data = []
+
+    return JsonResponse(data, safe=False)
