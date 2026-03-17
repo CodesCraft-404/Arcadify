@@ -1299,26 +1299,32 @@ background:#ff3b3b;
 }
 
 .add-friend {
-  position: relative;
+  width: 100%;
 }
 
 .input-wrapper {
   position: relative;
+  width: 100%;
+}
+
+.input-wrapper input {
+  width: 100%;
+  box-sizing: border-box;  /* 💥 prevents overflow */
 }
 
 /* DROPDOWN ABOVE INPUT */
 .search-results {
   position: absolute;
-  bottom: 100%;   /* 💥 THIS is the key */
+  bottom: 100%;
   left: 0;
-  width: 100%;
+  right: 0;              /* 💥 better than width: 100% */
 
-  margin-bottom: 6px; /* small gap above input */
+  margin-bottom: 6px;
 
   max-height: 150px;
   overflow-y: auto;
 
-  background: #202432; /* match your theme */
+  background: #202432;
   border-radius: 8px;
   padding: 6px;
 
@@ -1328,6 +1334,8 @@ background:#ff3b3b;
 
   box-shadow: 0 6px 14px rgba(0,0,0,0.5);
   z-index: 10;
+
+  box-sizing: border-box; /* 💥 fixes extra width */
 }
 </style>
 </head>
