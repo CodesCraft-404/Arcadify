@@ -2228,9 +2228,9 @@ async function refreshFriendPanel() {
 // Refresh every 3 sec
 setInterval(refreshFriendPanel, 3000);
 
-// Ping server every 10 seconds to show user is online
-setInterval(async () => {
-    await fetch("/ping-online/", {
+// Ping server every 10 seconds to keep user online
+setInterval(() => {
+    fetch("/ping-online/", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -2240,14 +2240,14 @@ setInterval(async () => {
 }, 10000);
 
 // Mark offline when tab/browser is closed
-window.addEventListener("beforeunload", async () => {
-    await fetch("/logout-online/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRFToken": getCSRFToken()
-        },
-    });
+window.addEventListener("beforeunload", () => {
+    const url = "/logout-online/";
+    const data = new FormData();
+    // CSRF token is required
+    data.append("csrfmiddlewaretoken", getCSRFToken());
+
+    // sendBeacon is synchronous for unload
+    navigator.sendBeacon(url, data);
 });
 </script>
 
