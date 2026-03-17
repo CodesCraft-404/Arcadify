@@ -21,6 +21,9 @@ def login_register_view(request):
             if user is not None:
                 login(request, user)
 
+                user.is_online = True
+                user.save(update_fields=['is_online'])
+
                 # check if superuser
                 if user.is_superuser:
                     return redirect('admin_page')
@@ -125,6 +128,11 @@ def home_view(request):
 
 
 def logout_view(request):
+    if request.user.is_authenticated:
+        # ✅ Mark offline before logging out
+        request.user.is_online = False
+        request.user.save(update_fields=['is_online'])
+        
     logout(request)
     return redirect('login_register')
 
@@ -270,3 +278,22 @@ def refresh_friends(request):
     ]
 
     return JsonResponse({"friends": friends, "pending_requests": pending_requests})
+
+from django.views.decorators.http import require_POST
+
+@require_POST
+@login_required
+def ping_online(request):
+    # Keep user online
+    request.user.is_online = True
+    request.user.save(update_fields=['is_online'])
+    return JsonResponse({"success": True})
+
+
+@require_POST
+@login_required
+def logout_online(request):
+    # Mark user offline
+    request.user.is_online = False
+    request.user.save(update_fields=['is_online'])
+    return JsonResponse({"success": True})
