@@ -71,6 +71,8 @@ def home_view(request):
         status='pending'
     )
 
+    friends = request.user.friends.all()
+
     # ✅ Characters logic
     characters_dir = os.path.join(settings.BASE_DIR, 'static', 'images', 'characters')
     characters = []
@@ -117,7 +119,8 @@ def home_view(request):
     # ✅ FINAL render (only once!)
     return render(request, 'accounts/home.html', {
         'characters': characters,
-        'pending_requests': pending_requests
+        'pending_requests': pending_requests,
+        'friends': friends   # 🔥 THIS LINE
     })
 
 
@@ -205,3 +208,43 @@ def send_friend_request(request):
             return JsonResponse({"error": "Request already exists"}, status=400)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+from django.views.decorators.http import require_POST
+
+@require_POST
+@login_required
+def accept_request(request):
+    req_id = request.POST.get("request_id")
+
+    try:
+        fr = FriendRequest.objects.get(id=req_id, to_user=request.user)
+    except FriendRequest.DoesNotExist:
+        return JsonResponse({"error": "Request not found"}, status=404)
+
+    # ✅ add both users as friends
+    request.user.friends.add(fr.from_user)
+
+    # ✅ update status
+    fr.status = "accepted"
+    fr.save()
+
+    return JsonResponse({
+        "success": True,
+        "name": fr.from_user.gamer_name,
+        "online": fr.from_user.is_online
+    })
+
+@require_POST
+@login_required
+def reject_request(request):
+    req_id = request.POST.get("request_id")
+
+    try:
+        fr = FriendRequest.objects.get(id=req_id, to_user=request.user)
+    except FriendRequest.DoesNotExist:
+        return JsonResponse({"error": "Request not found"}, status=404)
+
+    fr.status = "rejected"
+    fr.delete()  # ✅ allow re-send later
+
+    return JsonResponse({"success": True})
