@@ -13,5 +13,4 @@ urlpatterns = [
     path('reject-request/', views.reject_request),
     path("refresh-friends/", views.refresh_friends, name="refresh_friends"),
     path("ping-online/", views.ping_online, name="ping_online"),
-    path("logout-online/", views.logout_online, name="logout_online"),
 ]

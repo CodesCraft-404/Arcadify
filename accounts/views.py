@@ -284,16 +284,6 @@ from django.views.decorators.http import require_POST
 @require_POST
 @login_required
 def ping_online(request):
-    # Keep user online
-    request.user.is_online = True
-    request.user.save(update_fields=['is_online'])
-    return JsonResponse({"success": True})
-
-
-@require_POST
-@login_required
-def logout_online(request):
-    # Mark user offline
-    request.user.is_online = False
-    request.user.save(update_fields=['is_online'])
+    request.user.last_seen = timezone.now()
+    request.user.save(update_fields=['last_seen'])
     return JsonResponse({"success": True})

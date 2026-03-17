@@ -2237,17 +2237,7 @@ setInterval(async () => {
             "X-CSRFToken": getCSRFToken()
         },
     });
-}, 10000);
-
-// Mark offline when tab/browser is closed
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-        const url = "/logout-online/";
-        const data = new FormData();
-        data.append("csrfmiddlewaretoken", getCSRFToken());
-        navigator.sendBeacon(url, data);
-    }
-});
+}, 5000);
 </script>
 
 </body>
