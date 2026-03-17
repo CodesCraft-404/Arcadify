@@ -248,36 +248,3 @@ def reject_request(request):
     fr.delete()  # ✅ allow re-send later
 
     return JsonResponse({"success": True})
-
-from django.http import JsonResponse
-from .models import FriendRequest
-
-def friends_data(request):
-    user = request.user
-
-    friends = user.friends.all()
-    friend_data = [
-        {
-            "gamer_name": f.gamer_name,
-            "is_online": f.is_online
-        }
-        for f in friends
-    ]
-
-    requests = FriendRequest.objects.filter(
-        to_user=user,
-        status="pending"
-    )
-
-    request_data = [
-        {
-            "id": r.id,
-            "from_user": r.from_user.gamer_name
-        }
-        for r in requests
-    ]
-
-    return JsonResponse({
-        "friends": friend_data,
-        "requests": request_data
-    })
