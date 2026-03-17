@@ -160,13 +160,12 @@ def search_players(request):
 
     user = request.user
 
-    # 1️⃣ Users who are already friends
+    # Users who are already friends
     accepted_requests = FriendRequest.objects.filter(
         Q(from_user=user) | Q(to_user=user),
         status='accepted'
     )
 
-    # Get all friend IDs
     friend_ids = set()
     for fr in accepted_requests:
         if fr.from_user == user:
@@ -174,25 +173,13 @@ def search_players(request):
         else:
             friend_ids.add(fr.from_user.id)
 
-    # 2️⃣ Users with pending requests (sent or received) to avoid duplicates
-    pending_requests = FriendRequest.objects.filter(
-        Q(from_user=user) | Q(to_user=user),
-        status='pending'
-    )
-    pending_ids = set()
-    for fr in pending_requests:
-        if fr.from_user == user:
-            pending_ids.add(fr.to_user.id)
-        else:
-            pending_ids.add(fr.from_user.id)
-
-    # Final queryset: contains matching users excluding yourself, friends, and pending requests
+    # Final queryset: matching users excluding yourself and accepted friends
     users = CustomUser.objects.filter(
         gamer_name__icontains=query
     ).exclude(
         id=user.id
     ).exclude(
-        id__in=friend_ids.union(pending_ids)
+        id__in=friend_ids
     )[:10]
 
     data = [
