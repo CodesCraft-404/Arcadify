@@ -45,6 +45,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+    friends = models.ManyToManyField(
+        "self",
+        symmetrical=True,
+        blank=True
+    )
+
     def __str__(self):
         return self.gamer_name
 
