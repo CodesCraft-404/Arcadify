@@ -1490,9 +1490,9 @@ background:#ff3b3b;
         <button class="reject-btn">✖</button>
     </div>
 </div>
-{% empty %}
-<div style="padding:4px;">No pending requests.</div>
-{% endfor %}
+{% if not friends %}
+<div class="no-friends">No friends yet.</div>
+{% endif %}
 </div>
 
 <div class="add-friend">
@@ -2176,6 +2176,63 @@ function getCSRFToken() {
     }
     return '';
 }
+
+async function refreshFriendsPanel() {
+    try {
+        const res = await fetch("/friends-data/");
+        const data = await res.json();
+
+        const friendsList = document.querySelector(".friends-list");
+        const requestsList = document.querySelector(".friend-requests-list");
+
+        // CLEAR OLD
+        friendsList.innerHTML = "";
+        requestsList.innerHTML = "";
+
+        // 🟢 FRIENDS
+        if (data.friends.length === 0) {
+            friendsList.innerHTML = `<div class="no-friends">No friends yet.</div>`;
+        } else {
+            data.friends.forEach(f => {
+                const div = document.createElement("div");
+                div.className = `friend-item ${f.is_online ? "online" : "offline"}`;
+                div.innerHTML = `
+                    <div class="avatar"></div>
+                    <div class="friend-name">${f.gamer_name}</div>
+                `;
+                friendsList.appendChild(div);
+            });
+        }
+
+        // 🟡 REQUESTS
+        if (data.requests.length === 0) {
+            requestsList.innerHTML = `<div style="padding:4px;">No pending requests.</div>`;
+        } else {
+            data.requests.forEach(r => {
+                const div = document.createElement("div");
+                div.className = "friend-request-item";
+                div.dataset.id = r.id;
+                div.dataset.name = r.from_user;
+
+                div.innerHTML = `
+                    <div class="friend-name">${r.from_user}</div>
+                    <div class="request-actions">
+                        <button class="accept-btn">✔</button>
+                        <button class="reject-btn">✖</button>
+                    </div>
+                `;
+
+                requestsList.appendChild(div);
+            });
+        }
+
+    } catch (err) {
+        console.error("Refresh error:", err);
+    }
+}
+
+// ⏱ AUTO REFRESH
+setInterval(refreshFriendsPanel, 3000);
 </script>
 
 </body>
