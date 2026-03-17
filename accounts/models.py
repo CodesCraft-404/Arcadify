@@ -48,46 +48,38 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.gamer_name
 
-from django.db import IntegrityError
+from django.conf import settings
+from django.db import models
 
-@login_required
-def send_friend_request(request):
-    if request.method == "POST":
-        to_user_id = request.POST.get("user_id")
+class FriendRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    )
 
-        if not to_user_id:
-            return JsonResponse({"error": "Missing user_id"}, status=400)
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_requests'
+    )
 
-        try:
-            to_user = CustomUser.objects.get(id=to_user_id)
-        except CustomUser.DoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='received_requests'
+    )
 
-        # 🚫 prevent sending to yourself
-        if to_user == request.user:
-            return JsonResponse({"error": "Cannot send request to yourself"}, status=400)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
 
-        # 🔥 CHECK REVERSE REQUEST (SMART LOGIC)
-        reverse_request = FriendRequest.objects.filter(
-            from_user=to_user,
-            to_user=request.user,
-            status='pending'
-        ).first()
+    created_at = models.DateTimeField(auto_now_add=True)
 
-        if reverse_request:
-            reverse_request.status = 'accepted'
-            reverse_request.save()
-            return JsonResponse({"success": True, "message": "Friend added!"})
+    class Meta:
+        unique_together = ('from_user', 'to_user')  # 🚀 prevents duplicate requests
 
-        # ✅ CREATE REQUEST (SAFE)
-        try:
-            FriendRequest.objects.create(
-                from_user=request.user,
-                to_user=to_user
-            )
-            return JsonResponse({"success": True})
-
-        except IntegrityError:
-            return JsonResponse({"error": "Request already exists"}, status=400)
-
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    def __str__(self):
+        return f"{self.from_user} → {self.to_user} ({self.status})"

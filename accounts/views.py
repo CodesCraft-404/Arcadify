@@ -162,14 +162,15 @@ def search_players(request):
 
     return JsonResponse(data, safe=False)
 
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import CustomUser, FriendRequest
+from django.db import IntegrityError
 
 @login_required
 def send_friend_request(request):
     if request.method == "POST":
         to_user_id = request.POST.get("user_id")
+
+        if not to_user_id:
+            return JsonResponse({"error": "Missing user_id"}, status=400)
 
         try:
             to_user = CustomUser.objects.get(id=to_user_id)
@@ -180,21 +181,27 @@ def send_friend_request(request):
         if to_user == request.user:
             return JsonResponse({"error": "Cannot send request to yourself"}, status=400)
 
-        # 🚫 prevent duplicate requests
-        existing = FriendRequest.objects.filter(
-            from_user=request.user,
-            to_user=to_user
+        # 🔥 CHECK REVERSE REQUEST (SMART LOGIC)
+        reverse_request = FriendRequest.objects.filter(
+            from_user=to_user,
+            to_user=request.user,
+            status='pending'
         ).first()
 
-        if existing:
-            return JsonResponse({"error": "Request already sent"}, status=400)
+        if reverse_request:
+            reverse_request.status = 'accepted'
+            reverse_request.save()
+            return JsonResponse({"success": True, "message": "Friend added!"})
 
-        # ✅ create request
-        FriendRequest.objects.create(
-            from_user=request.user,
-            to_user=to_user
-        )
+        # ✅ CREATE REQUEST (SAFE)
+        try:
+            FriendRequest.objects.create(
+                from_user=request.user,
+                to_user=to_user
+            )
+            return JsonResponse({"success": True})
 
-        return JsonResponse({"success": True})
+        except IntegrityError:
+            return JsonResponse({"error": "Request already exists"}, status=400)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
