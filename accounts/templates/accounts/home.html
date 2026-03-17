@@ -1491,7 +1491,7 @@ background:#ff3b3b;
     </div>
 </div>
 {% empty %}
-<div id="noFriendsText" style="padding:4px;">No friends yet.</div>
+<div style="padding:4px;">No pending requests.</div>
 {% endfor %}
 </div>
 
@@ -2031,41 +2031,40 @@ friendRequestsList.addEventListener("click", async (e) => {
     const name = item.dataset.name;
 
     // ✅ ACCEPT
-if (e.target.classList.contains("accept-btn")) {
+    if (e.target.classList.contains("accept-btn")) {
 
-    const requestId = item.dataset.id;
-    const name = item.dataset.name;
+        if (!confirm(`Accept request from ${name}?`)) return;
 
-    const res = await fetch(`/accept-request/${requestId}/`, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRFToken()
+        const res = await fetch("/accept-request/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: `request_id=${id}`
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            // 🔥 ADD TO FRIEND LIST UI
+            const div = document.createElement("div");
+            div.classList.add("friend-item");
+
+            if (data.online) div.classList.add("online");
+            else div.classList.add("offline");
+
+            div.innerHTML = `
+                <div class="avatar"></div>
+                <div class="friend-name">${data.name}</div>
+            `;
+
+            document.querySelector(".friends-list").appendChild(div);
+
+            item.remove(); // remove request
         }
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-
-        // ❌ remove "No friends yet"
-        const emptyText = document.getElementById("noFriendsText");
-        if (emptyText) emptyText.remove();
-
-        // ✅ create friend item
-        const div = document.createElement("div");
-        div.classList.add("friend-item", data.online ? "online" : "offline");
-
-        div.innerHTML = `
-            <div class="avatar"></div>
-            <div class="friend-name">${name}</div>
-        `;
-
-        friendsList.appendChild(div);
-
-        // remove request
-        item.remove();
     }
-}
 
     // ❌ REJECT
     if (e.target.classList.contains("reject-btn")) {
@@ -2177,31 +2176,6 @@ function getCSRFToken() {
     }
     return '';
 }
-
-setInterval(async () => {
-    const res = await fetch("/get-friends/");
-    const data = await res.json();
-
-    friendsList.innerHTML = "";
-
-    if (data.length === 0) {
-        friendsList.innerHTML = `<div id="noFriendsText">No friends yet.</div>`;
-        return;
-    }
-
-    data.forEach(friend => {
-        const div = document.createElement("div");
-        div.classList.add("friend-item", friend.online ? "online" : "offline");
-
-        div.innerHTML = `
-            <div class="avatar"></div>
-            <div class="friend-name">${friend.name}</div>
-        `;
-
-        friendsList.appendChild(div);
-    });
-
-}, 3000); // every 3 sec
 </script>
 
 </body>

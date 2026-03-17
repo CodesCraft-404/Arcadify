@@ -248,16 +248,3 @@ def reject_request(request):
     fr.delete()  # ✅ allow re-send later
 
     return JsonResponse({"success": True})
-
-def get_friends(request):
-    friends = request.user.friends.all()
-
-    data = [
-        {
-            "name": f.gamer_name,
-            "online": f.is_online
-        }
-        for f in friends
-    ]
-
-    return JsonResponse(data, safe=False)
