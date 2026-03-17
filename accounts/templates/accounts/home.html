@@ -2169,14 +2169,8 @@ document.addEventListener("click", (e) => {
 });
 
 document.getElementById("addFriendBtn").addEventListener("click", async () => {
-    const name = document.getElementById("addFriendInput").value.trim();
-    if (!name) return;
-
-    const selectedUser = window.selectedUser;
-    if (!selectedUser) {
-        showNotification("Select a valid user", "error");
-        return;
-    }
+    const inputName = input.value.trim();
+    if (!inputName) return;
 
     try {
         const res = await fetch("/send-request/", {
@@ -2185,24 +2179,54 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "X-CSRFToken": getCSRFToken()
             },
-            body: `user_id=${selectedUser.id}`
+            body: `username=${encodeURIComponent(inputName)}`
         });
 
         const data = await res.json();
 
+        // Already friends
         if (data.status === "already_friend") {
             showNotification(`You are already friends with ${data.name}`, "info");
+
+        // Already sent a pending request
         } else if (data.status === "already_sent") {
             showNotification(`You already sent a friend request to ${data.name}`, "info");
+
+        // Invalid username or not registered
+        } else if (data.status === "invalid_user") {
+            showNotification("Invalid username or this player has not played yet", "error");
+
+        // Cannot send request to yourself
+        } else if (data.status === "self_request") {
+            showNotification("You cannot send a friend request to yourself", "error");
+
+        // Success — new request or auto-accepted reverse request
         } else if (data.success) {
-            showNotification(data.message || `Friend request sent to ${selectedUser.gamer_name}`, "success");
-        } else if (data.error) {
-            showNotification(data.error, "error");
+            showNotification(data.message, "success");
+            input.value = "";
+            window.selectedUser = null;
+
+            // 🔥 Immediately add to friends list if reverse request auto-accepted
+            if (data.friend_added) {
+                const div = document.createElement("div");
+                div.classList.add("friend-item");
+                div.classList.add(data.friend_online ? "online" : "offline");
+
+                div.innerHTML = `
+                    <div class="avatar"></div>
+                    <div class="friend-name">${data.friend_name}</div>
+                `;
+                document.querySelector(".friends-list").appendChild(div);
+            }
+
+        // Fallback for any unexpected errors
+        } else {
+            showNotification(data.error || "Something went wrong", "error");
         }
 
     } catch (err) {
-        console.error("Error sending friend request:", err);
-        showNotification("Something went wrong. Try again.", "error");
+        console.error(err);
+        showNotification("Error sending friend request", "error");
     }
 });
 
