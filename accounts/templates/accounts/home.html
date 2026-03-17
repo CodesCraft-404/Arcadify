@@ -2069,9 +2069,10 @@ input.addEventListener("input", async () => {
 
         // CLICK TO SELECT
         div.addEventListener("click", () => {
-            input.value = user.gamer_name;
-            resultsBox.style.display = "none";
-        });
+    input.value = user.gamer_name;
+    window.selectedUser = user; // 🔥 store actual object
+    resultsBox.style.display = "none";
+});
 
         resultsBox.appendChild(div);
     });
@@ -2091,9 +2092,7 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
     if (!name) return;
 
     // find user from last search results
-    const selectedUser = window.lastSearchResults?.find(
-        u => u.gamer_name === name
-    );
+    const selectedUser = window.selectedUser;
 
     if (!selectedUser) {
         alert("Select a valid user");
@@ -2117,6 +2116,17 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
         alert(data.error);
     }
 });
+
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
 </script>
 
 </body>
