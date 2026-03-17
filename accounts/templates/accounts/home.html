@@ -1337,6 +1337,28 @@ background:#ff3b3b;
 
   box-sizing: border-box; /* 💥 fixes extra width */
 }
+
+.search-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+
+  color: #d6d9e3;
+  font-size: 14px;
+
+  display: flex;
+  align-items: center;
+
+  transition: 
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.search-item:hover {
+  background: rgba(79, 70, 229, 0.15);   /* soft purple glow */
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
 </style>
 </head>
 <body>
@@ -2031,6 +2053,8 @@ input.addEventListener("input", async () => {
     const res = await fetch(`/search-players/?q=${query}`);
     const data = await res.json();
 
+    window.lastSearchResults = data;
+
     resultsBox.innerHTML = "";
 
     if (data.length === 0) {
@@ -2061,6 +2085,38 @@ document.addEventListener("click", (e) => {
     }
 });
 
+document.getElementById("addFriendBtn").addEventListener("click", async () => {
+    const name = document.getElementById("addFriendInput").value.trim();
+
+    if (!name) return;
+
+    // find user from last search results
+    const selectedUser = window.lastSearchResults?.find(
+        u => u.gamer_name === name
+    );
+
+    if (!selectedUser) {
+        alert("Select a valid user");
+        return;
+    }
+
+    const res = await fetch("/send-request/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: `user_id=${selectedUser.id}`
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert("Friend request sent ✅");
+    } else {
+        alert(data.error);
+    }
+});
 </script>
 
 </body>

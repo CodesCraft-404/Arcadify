@@ -59,23 +59,29 @@ def login_register_view(request):
     return render(request, 'accounts/login_registration.html')
 
 
+from .models import FriendRequest  # make sure this is imported
+
 def home_view(request):
     if not request.user.is_authenticated:
         return redirect('login_register')
 
-    # Path to characters folder (project-level static)
-    characters_dir = os.path.join(settings.BASE_DIR, 'static', 'images', 'characters')
+    # ✅ Friend requests
+    pending_requests = FriendRequest.objects.filter(
+        to_user=request.user,
+        status='pending'
+    )
 
+    # ✅ Characters logic
+    characters_dir = os.path.join(settings.BASE_DIR, 'static', 'images', 'characters')
     characters = []
 
     if os.path.exists(characters_dir):
         for char_folder in os.listdir(characters_dir):
             char_path = os.path.join(characters_dir, char_folder)
+
             if os.path.isdir(char_path):
-                # Main image
                 main_img = f'images/characters/{char_folder}/{char_folder}.png'
 
-                # Skins
                 skin_path = os.path.join(char_path, 'skin')
                 skins = []
                 if os.path.exists(skin_path):
@@ -84,21 +90,22 @@ def home_view(request):
                         for f in sorted(os.listdir(skin_path)) if f.endswith('.png')
                     ]
 
-                # Data files
                 data_path = os.path.join(char_path, 'data')
                 char_info = ''
                 char_ability = ''
+
                 if os.path.exists(data_path):
                     info_file = os.path.join(data_path, 'info.txt')
                     ability_file = os.path.join(data_path, 'ability.txt')
+
                     if os.path.exists(info_file):
                         with open(info_file, 'r', encoding='utf-8') as f:
                             char_info = f.read().strip()
+
                     if os.path.exists(ability_file):
                         with open(ability_file, 'r', encoding='utf-8') as f:
                             char_ability = f.read().strip()
 
-                # Append character data
                 characters.append({
                     'name': char_folder,
                     'main_image': main_img,
@@ -107,7 +114,11 @@ def home_view(request):
                     'ability': char_ability,
                 })
 
-    return render(request, 'accounts/home.html', {'characters': characters})
+    # ✅ FINAL render (only once!)
+    return render(request, 'accounts/home.html', {
+        'characters': characters,
+        'pending_requests': pending_requests
+    })
 
 
 def logout_view(request):
@@ -150,3 +161,40 @@ def search_players(request):
         data = []
 
     return JsonResponse(data, safe=False)
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import CustomUser, FriendRequest
+
+@login_required
+def send_friend_request(request):
+    if request.method == "POST":
+        to_user_id = request.POST.get("user_id")
+
+        try:
+            to_user = CustomUser.objects.get(id=to_user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # 🚫 prevent sending to yourself
+        if to_user == request.user:
+            return JsonResponse({"error": "Cannot send request to yourself"}, status=400)
+
+        # 🚫 prevent duplicate requests
+        existing = FriendRequest.objects.filter(
+            from_user=request.user,
+            to_user=to_user
+        ).first()
+
+        if existing:
+            return JsonResponse({"error": "Request already sent"}, status=400)
+
+        # ✅ create request
+        FriendRequest.objects.create(
+            from_user=request.user,
+            to_user=to_user
+        )
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)

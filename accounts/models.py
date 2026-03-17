@@ -47,3 +47,47 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.gamer_name
+
+from django.db import IntegrityError
+
+@login_required
+def send_friend_request(request):
+    if request.method == "POST":
+        to_user_id = request.POST.get("user_id")
+
+        if not to_user_id:
+            return JsonResponse({"error": "Missing user_id"}, status=400)
+
+        try:
+            to_user = CustomUser.objects.get(id=to_user_id)
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # 🚫 prevent sending to yourself
+        if to_user == request.user:
+            return JsonResponse({"error": "Cannot send request to yourself"}, status=400)
+
+        # 🔥 CHECK REVERSE REQUEST (SMART LOGIC)
+        reverse_request = FriendRequest.objects.filter(
+            from_user=to_user,
+            to_user=request.user,
+            status='pending'
+        ).first()
+
+        if reverse_request:
+            reverse_request.status = 'accepted'
+            reverse_request.save()
+            return JsonResponse({"success": True, "message": "Friend added!"})
+
+        # ✅ CREATE REQUEST (SAFE)
+        try:
+            FriendRequest.objects.create(
+                from_user=request.user,
+                to_user=to_user
+            )
+            return JsonResponse({"success": True})
+
+        except IntegrityError:
+            return JsonResponse({"error": "Request already exists"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
