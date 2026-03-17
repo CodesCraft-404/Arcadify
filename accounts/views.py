@@ -155,12 +155,13 @@ from django.db.models import Q
 @login_required
 def search_players(request):
     query = request.GET.get('q', '').strip()
+
     if not query:
         return JsonResponse([], safe=False)
 
     user = request.user
 
-    # Exclude yourself and already friends
+    # Users who are already friends
     accepted_requests = FriendRequest.objects.filter(
         Q(from_user=user) | Q(to_user=user),
         status='accepted'
@@ -168,14 +169,25 @@ def search_players(request):
 
     friend_ids = set()
     for fr in accepted_requests:
-        friend_ids.add(fr.from_user.id)
-        friend_ids.add(fr.to_user.id)
+        if fr.from_user == user:
+            friend_ids.add(fr.to_user.id)
+        else:
+            friend_ids.add(fr.from_user.id)
 
+    # Final queryset: matching users excluding yourself and accepted friends
     users = CustomUser.objects.filter(
         gamer_name__icontains=query
-    ).exclude(id=user.id).exclude(id__in=friend_ids)[:10]
+    ).exclude(
+        id=user.id
+    ).exclude(
+        id__in=friend_ids
+    )[:10]
 
-    data = [{"id": u.id, "gamer_name": u.gamer_name} for u in users]
+    data = [
+        {"id": u.id, "gamer_name": u.gamer_name}
+        for u in users
+    ]
+
     return JsonResponse(data, safe=False)
 
 from django.http import JsonResponse
