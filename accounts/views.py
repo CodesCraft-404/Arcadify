@@ -148,28 +148,57 @@ def admin_page_view(request):
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import CustomUser
+from .models import CustomUser, FriendRequest
+from django.db.models import Q
 
 @login_required
 def search_players(request):
     query = request.GET.get('q', '').strip()
 
-    if query:
-        users = CustomUser.objects.filter(
-            gamer_name__icontains=query
-        ).exclude(
-            id=request.user.id   # 🚀 exclude yourself
-        )[:10]
+    if not query:
+        return JsonResponse([], safe=False)
 
-        data = [
-            {
-                "id": user.id,
-                "gamer_name": user.gamer_name
-            }
-            for user in users
-        ]
-    else:
-        data = []
+    user = request.user
+
+    # 1️⃣ Users who are already friends
+    accepted_requests = FriendRequest.objects.filter(
+        Q(from_user=user) | Q(to_user=user),
+        status='accepted'
+    )
+
+    # Get all friend IDs
+    friend_ids = set()
+    for fr in accepted_requests:
+        if fr.from_user == user:
+            friend_ids.add(fr.to_user.id)
+        else:
+            friend_ids.add(fr.from_user.id)
+
+    # 2️⃣ Users with pending requests (sent or received) to avoid duplicates
+    pending_requests = FriendRequest.objects.filter(
+        Q(from_user=user) | Q(to_user=user),
+        status='pending'
+    )
+    pending_ids = set()
+    for fr in pending_requests:
+        if fr.from_user == user:
+            pending_ids.add(fr.to_user.id)
+        else:
+            pending_ids.add(fr.from_user.id)
+
+    # Final queryset: contains matching users excluding yourself, friends, and pending requests
+    users = CustomUser.objects.filter(
+        gamer_name__icontains=query
+    ).exclude(
+        id=user.id
+    ).exclude(
+        id__in=friend_ids.union(pending_ids)
+    )[:10]
+
+    data = [
+        {"id": u.id, "gamer_name": u.gamer_name}
+        for u in users
+    ]
 
     return JsonResponse(data, safe=False)
 
