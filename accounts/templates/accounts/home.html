@@ -283,7 +283,9 @@ flex:1;
 display:grid;
 grid-template-columns:repeat(2, 1fr);
 
-gap:18px;
+gap:20px;
+
+align-content:start; 
 
 overflow-y:auto;
 
@@ -306,7 +308,8 @@ border:2px solid transparent;
 position:relative;
 
 width:100%;
-aspect-ratio:1 / 1;   /* 🔥 perfect square */
+height:0;
+padding-top:100%;   /* makes it square */
 
 overflow:hidden;
 
