@@ -278,12 +278,3 @@ def refresh_friends(request):
     ]
 
     return JsonResponse({"friends": friends, "pending_requests": pending_requests})
-
-from django.views.decorators.http import require_POST
-
-@require_POST
-@login_required
-def ping_online(request):
-    request.user.last_seen = timezone.now()
-    request.user.save(update_fields=['last_seen'])
-    return JsonResponse({"success": True})

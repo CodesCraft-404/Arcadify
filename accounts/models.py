@@ -2,7 +2,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils import timezone
-from datetime import timedelta
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, gmail, password, **extra_fields):
@@ -28,7 +27,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.BigAutoField(primary_key=True)                # ID
-    name = models.CharField(max_length=100)                   # Full name
+    name = models.CharField(max_length=100)                  # Full name
     gamer_name = models.CharField(max_length=50, unique=True) # Gamer name
     age = models.PositiveIntegerField(null=True, blank=True) # Age
     gmail = models.EmailField(unique=True)                   # Email/login
@@ -37,7 +36,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)        # Superuser
     is_staff = models.BooleanField(default=False)            # Staff/admin
     is_active = models.BooleanField(default=True)            # Active/banned
-    last_seen = models.DateTimeField(blank=True, null=True)  # Last time user was active
+    is_online = models.BooleanField(default=False)           # Online status
     level = models.PositiveIntegerField(default=1)           # Level
     coins = models.IntegerField(default=0)                   # Coins
 
@@ -54,13 +53,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.gamer_name
-
-    @property
-    def is_online(self):
-        """User is online if last_seen was within the last 15 seconds"""
-        if not self.last_seen:
-            return False
-        return timezone.now() - self.last_seen < timedelta(seconds=15)
 
 from django.conf import settings
 from django.db import models
