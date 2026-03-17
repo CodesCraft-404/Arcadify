@@ -1471,7 +1471,7 @@ background:#ff3b3b;
 <!-- FRIENDS LIST -->
 <div class="friends-list">
 {% for f in friends %}
-<div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.name }}">
+<div class="friend-item {% if f.online %}online{% else %}offline{% endif %}" data-name="{{ f.gamer_name }}">
     <div class="avatar"></div>
     <div class="friend-name">{{ f.name }}</div>
 </div>
@@ -2176,6 +2176,57 @@ function getCSRFToken() {
     }
     return '';
 }
+
+async function refreshFriendPanel() {
+    try {
+        const res = await fetch("/refresh-friends/");
+        const data = await res.json();
+
+        // ===== Update friends list =====
+        friendsList.innerHTML = "";
+        if (data.friends.length === 0) {
+            friendsList.innerHTML = '<div style="padding:4px;">No friends yet.</div>';
+        } else {
+            data.friends.forEach(f => {
+                const div = document.createElement("div");
+                div.classList.add("friend-item");
+                div.classList.add(f.is_online ? "online" : "offline");
+                div.dataset.name = f.gamer_name;
+
+                div.innerHTML = `<div class="avatar"></div>
+                                 <div class="friend-name">${f.gamer_name}</div>`;
+
+                friendsList.appendChild(div);
+            });
+        }
+
+        // ===== Update pending requests =====
+        friendRequestsList.innerHTML = "";
+        if (data.pending_requests.length === 0) {
+            friendRequestsList.innerHTML = '<div style="padding:4px;">No pending requests.</div>';
+        } else {
+            data.pending_requests.forEach(req => {
+                const div = document.createElement("div");
+                div.classList.add("friend-request-item");
+                div.dataset.id = req.id;
+                div.dataset.name = req.from_user;
+
+                div.innerHTML = `<div class="friend-name">${req.from_user}</div>
+                                 <div class="request-actions">
+                                     <button class="accept-btn">✔</button>
+                                     <button class="reject-btn">✖</button>
+                                 </div>`;
+                friendRequestsList.appendChild(div);
+            });
+        }
+
+    } catch (err) {
+        console.error("Error refreshing friends panel:", err);
+    }
+}
+
+// Refresh every 3 sec
+setInterval(refreshFriendPanel, 3000);
 </script>
 
 </body>

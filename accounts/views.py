@@ -248,3 +248,25 @@ def reject_request(request):
     fr.delete()  # ✅ allow re-send later
 
     return JsonResponse({"success": True})
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import CustomUser, FriendRequest
+
+@login_required
+def refresh_friends(request):
+    user = request.user
+
+    # Friends
+    friends = [
+        {"gamer_name": f.gamer_name, "is_online": f.is_online}
+        for f in user.friends.all()
+    ]
+
+    # Pending requests
+    pending_requests = [
+        {"id": fr.id, "from_user": fr.from_user.gamer_name}
+        for fr in FriendRequest.objects.filter(to_user=user, status="pending")
+    ]
+
+    return JsonResponse({"friends": friends, "pending_requests": pending_requests})
