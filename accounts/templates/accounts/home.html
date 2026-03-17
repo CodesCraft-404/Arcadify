@@ -1302,14 +1302,23 @@ background:#ff3b3b;
   position: relative;
 }
 
+.input-wrapper {
+  position: relative;
+}
+
+/* DROPDOWN ABOVE INPUT */
 .search-results {
   position: absolute;
-  bottom: 45px; /* appears ABOVE input */
+  bottom: 100%;   /* 💥 THIS is the key */
+  left: 0;
   width: 100%;
+
+  margin-bottom: 6px; /* small gap above input */
+
   max-height: 150px;
   overflow-y: auto;
 
-  background: #2a2a2a;
+  background: #202432; /* match your theme */
   border-radius: 8px;
   padding: 6px;
 
@@ -1317,17 +1326,8 @@ background:#ff3b3b;
   flex-direction: column;
   gap: 4px;
 
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-}
-
-.search-item {
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.search-item:hover {
-  background: rgba(255,255,255,0.1);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+  z-index: 10;
 }
 </style>
 </head>
@@ -1467,10 +1467,12 @@ background:#ff3b3b;
 
 <div class="add-friend">
 
-    <!-- SEARCH RESULTS DROPDOWN -->
-    <div id="searchResults" class="search-results"></div>
+    <div class="input-wrapper">
+        <div id="searchResults" class="search-results"></div>
 
-    <input id="addFriendInput" placeholder="Player Name">
+        <input id="addFriendInput" placeholder="Player Name">
+    </div>
+
     <button id="addFriendBtn" type="button">Add Friend</button>
 
 </div>
