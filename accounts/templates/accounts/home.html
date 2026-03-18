@@ -1567,8 +1567,7 @@ background:#ff3b3b;
     <input id="friendSearch" class="search-box" placeholder="Search">
 
     <select id="friendFilter" class="filter-dropdown">
-        <option value="all">All</option>
-        <option value="online">Online</option>
+        <option value="online" selected>Online</option>
         <option value="offline">Offline</option>
     </select>
 </div>
@@ -2411,14 +2410,13 @@ function filterAndSortFriends() {
     const container = document.querySelector(".friends-list");
     const items = Array.from(container.querySelectorAll(".friend-item"));
 
-    // 🔍 FILTER (ONLY SEARCH, NOT ONLINE/OFFLINE)
     let visibleItems = [];
 
+    // 🔍 SEARCH FILTER ONLY
     items.forEach(item => {
         const name = item.dataset.name.toLowerCase();
-        const matchesSearch = name.includes(search);
 
-        if (matchesSearch) {
+        if (name.includes(search)) {
             item.style.display = "flex";
             visibleItems.push(item);
         } else {
@@ -2426,20 +2424,18 @@ function filterAndSortFriends() {
         }
     });
 
-    // 🔥 SORTING BASED ON DROPDOWN
+    // 🔥 SORTING
     visibleItems.sort((a, b) => {
         const aOnline = a.classList.contains("online");
         const bOnline = b.classList.contains("online");
 
         if (filter === "online") {
-            return bOnline - aOnline; // online first
+            return bOnline - aOnline; // 🟢 online first
         }
 
         if (filter === "offline") {
-            return aOnline - bOnline; // offline first
+            return aOnline - bOnline; // ⚫ offline first
         }
-
-        return 0; // keep original order for "all"
     });
 
     // 🔄 APPLY ORDER
