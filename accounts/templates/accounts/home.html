@@ -2123,51 +2123,57 @@ friendRequestsList.addEventListener("click", async (e) => {
 
 const input = document.getElementById("addFriendInput");
 const resultsBox = document.getElementById("searchResults");
+const friendsList = document.querySelector(".friends-list");
+const friendRequestsList = document.querySelector(".friend-requests-list");
 
+// ------------------- SEARCH PLAYERS -------------------
 input.addEventListener("input", async () => {
     const query = input.value.trim();
-
-    if (query.length === 0) {
+    if (!query) {
         resultsBox.style.display = "none";
         return;
     }
 
-    const res = await fetch(`/search-players/?q=${query}`);
-    const data = await res.json();
+    try {
+        const res = await fetch(`/search-players/?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
 
-    window.lastSearchResults = data;
+        window.lastSearchResults = data;
+        resultsBox.innerHTML = "";
 
-    resultsBox.innerHTML = "";
+        if (data.length === 0) {
+            resultsBox.style.display = "none";
+            return;
+        }
 
-    if (data.length === 0) {
-        resultsBox.style.display = "none";
-        return;
+        data.forEach(user => {
+            const div = document.createElement("div");
+            div.classList.add("search-item");
+            div.textContent = user.gamer_name;
+
+            div.addEventListener("click", () => {
+                input.value = user.gamer_name;
+                window.selectedUser = user;
+                resultsBox.style.display = "none";
+            });
+
+            resultsBox.appendChild(div);
+        });
+
+        resultsBox.style.display = "flex";
+    } catch (err) {
+        console.error("Search error:", err);
     }
-
-    data.forEach(user => {
-        const div = document.createElement("div");
-        div.classList.add("search-item");
-        div.textContent = user.gamer_name;
-
-        // CLICK TO SELECT
-        div.addEventListener("click", () => {
-    input.value = user.gamer_name;
-    window.selectedUser = user; // 🔥 store actual object
-    resultsBox.style.display = "none";
 });
 
-        resultsBox.appendChild(div);
-    });
-
-    resultsBox.style.display = "flex";
-});
-
+// Hide search results when clicking outside
 document.addEventListener("click", (e) => {
     if (!document.querySelector(".add-friend").contains(e.target)) {
         resultsBox.style.display = "none";
     }
 });
 
+// ------------------- SEND FRIEND REQUEST -------------------
 document.getElementById("addFriendBtn").addEventListener("click", async () => {
     const inputName = input.value.trim();
     if (!inputName) return;
@@ -2197,11 +2203,8 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
             input.value = "";
             window.selectedUser = null;
 
-            // 🔥 Refresh the friends panel immediately
-            if (data.friend_added) {
-                await refreshFriendPanel();
-            }
-
+            // 🔥 Refresh from backend immediately to fetch updated friends & requests
+            await refreshFriendPanel();
         } else {
             showNotification(data.error || "Something went wrong", "error");
         }
@@ -2212,41 +2215,30 @@ document.getElementById("addFriendBtn").addEventListener("click", async () => {
     }
 });
 
-function getCSRFToken() {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'csrftoken') {
-            return value;
-        }
-    }
-    return '';
-}
-
+// ------------------- REFRESH FRIENDS PANEL -------------------
 async function refreshFriendPanel() {
     try {
         const res = await fetch("/refresh-friends/");
         const data = await res.json();
 
-        // ===== Update friends list =====
+        // --- FRIEND LIST ---
         friendsList.innerHTML = "";
         if (data.friends.length === 0) {
             friendsList.innerHTML = '<div style="padding:4px;">No friends yet.</div>';
         } else {
             data.friends.forEach(f => {
                 const div = document.createElement("div");
-                div.classList.add("friend-item");
-                div.classList.add(f.is_online ? "online" : "offline");
+                div.classList.add("friend-item", f.is_online ? "online" : "offline");
                 div.dataset.name = f.gamer_name;
-
-                div.innerHTML = `<div class="avatar"></div>
-                                 <div class="friend-name">${f.gamer_name}</div>`;
-
+                div.innerHTML = `
+                    <div class="avatar"></div>
+                    <div class="friend-name">${f.gamer_name}</div>
+                `;
                 friendsList.appendChild(div);
             });
         }
 
-        // ===== Update pending requests =====
+        // --- PENDING REQUESTS ---
         friendRequestsList.innerHTML = "";
         if (data.pending_requests.length === 0) {
             friendRequestsList.innerHTML = '<div style="padding:4px;">No pending requests.</div>';
@@ -2256,12 +2248,13 @@ async function refreshFriendPanel() {
                 div.classList.add("friend-request-item");
                 div.dataset.id = req.id;
                 div.dataset.name = req.from_user;
-
-                div.innerHTML = `<div class="friend-name">${req.from_user}</div>
-                                 <div class="request-actions">
-                                     <button class="accept-btn">✔</button>
-                                     <button class="reject-btn">✖</button>
-                                 </div>`;
+                div.innerHTML = `
+                    <div class="friend-name">${req.from_user}</div>
+                    <div class="request-actions">
+                        <button class="accept-btn">✔</button>
+                        <button class="reject-btn">✖</button>
+                    </div>
+                `;
                 friendRequestsList.appendChild(div);
             });
         }
@@ -2271,9 +2264,17 @@ async function refreshFriendPanel() {
     }
 }
 
-// Refresh every 3 sec
-setInterval(refreshFriendPanel, 3000);
+// ------------------- CSRF -------------------
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') return value;
+    }
+    return '';
+}
 
+// ------------------- NOTIFICATIONS -------------------
 function showNotification(message, type="info", duration=4000) {
     const container = document.getElementById("notification-container");
     const div = document.createElement("div");
@@ -2281,15 +2282,16 @@ function showNotification(message, type="info", duration=4000) {
     div.textContent = message;
     container.appendChild(div);
 
-    // trigger slide-in
     setTimeout(() => div.classList.add("show"), 50);
 
-    // remove after duration
     setTimeout(() => {
         div.classList.remove("show");
         setTimeout(() => div.remove(), 500);
     }, duration);
 }
+
+// 🔥 Call once on page load to populate the panel
+refreshFriendPanel();
 </script>
 
 </body>

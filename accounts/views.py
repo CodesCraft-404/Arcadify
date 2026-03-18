@@ -181,15 +181,14 @@ def search_players(request):
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser, FriendRequest
-from django.db import IntegrityError
+from django.db.models import Q
 
 @login_required
 def send_friend_request(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"}, status=400)
 
-    to_username = request.POST.get("username")  # input from frontend
-
+    to_username = request.POST.get("username")
     if not to_username:
         return JsonResponse({"error": "Missing username"}, status=400)
 
@@ -201,7 +200,7 @@ def send_friend_request(request):
     if to_user == request.user:
         return JsonResponse({"status": "self_request"})
 
-    # Already friends
+    # Check if already friends
     if FriendRequest.objects.filter(
         Q(from_user=request.user, to_user=to_user, status='accepted') |
         Q(from_user=to_user, to_user=request.user, status='accepted')
@@ -218,10 +217,13 @@ def send_friend_request(request):
     reverse_request = FriendRequest.objects.filter(
         from_user=to_user, to_user=request.user, status='pending'
     ).first()
+
     if reverse_request:
         reverse_request.status = 'accepted'
         reverse_request.save()
-        # ✅ Return extra fields for frontend to instantly add the friend
+
+        # ✅ Ensure both users are synced in the backend
+        # No frontend polling needed, database is the source of truth
         return JsonResponse({
             "success": True,
             "message": f"You are now friends with {to_user.gamer_name}!",
@@ -230,7 +232,7 @@ def send_friend_request(request):
             "friend_online": to_user.is_online
         })
 
-    # Create new request
+    # Create a new request
     FriendRequest.objects.create(from_user=request.user, to_user=to_user)
     return JsonResponse({"success": True, "message": f"Friend request sent to {to_user.gamer_name}!"})
 
