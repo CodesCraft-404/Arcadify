@@ -611,49 +611,116 @@ gap:12px;
    TITLE
 ========================= */
 
+/* =========================
+   PANEL TITLE
+========================= */
+
 .panel-title{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:0.6px;
 
-font-size:30px;
-font-weight:600;
-letter-spacing:0.5px;
+    color:#e6e8ee;
 
-color:#e6e8ee;
+    margin:0 0 6px 4px;
 
-margin-top:-5px;
-margin-bottom:0px;
-margin-left:4px;   /* small push from left */
-
-text-shadow:
-0 1px 0 rgba(255,255,255,0.05),
-0 3px 8px rgba(0,0,0,0.8);
+    text-shadow:
+        0 1px 0 rgba(255,255,255,0.05),
+        0 4px 10px rgba(0,0,0,0.8);
 }
+
+
+/* =========================
+   SEARCH + FILTER ROW
+========================= */
+
+.search-filter-row{
+    display:flex;
+    gap:6px;
+    padding:6px 4px;
+}
+
 
 /* =========================
    SEARCH BOX
 ========================= */
 
 .search-box{
+    flex:1;
+    height:36px;
 
-height:36px;
+    background:#12151c;
 
-background:#12151c;
+    border:1px solid rgba(255,255,255,0.08);
 
-border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px;
 
-border-radius:8px;
+    padding:0 10px;
 
-padding:0 10px;
+    color:white;
 
-color:white;
+    outline:none;
 
-outline:none;
+    transition:all 0.2s ease;
+}
 
-transition:0.2s;
+.search-box::placeholder{
+    color:#7a8194;
 }
 
 .search-box:focus{
-border-color:#4f46e5;
-box-shadow:0 0 6px rgba(79,70,229,0.5);
+    border-color:#4f46e5;
+    box-shadow:0 0 8px rgba(79,70,229,0.6);
+    background:#151926;
+}
+
+
+/* =========================
+   FILTER DROPDOWN
+========================= */
+
+.filter-dropdown{
+    width:90px;
+    height:36px;
+
+    background:#12151c;
+
+    color:#e6e8ee;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    border-radius:8px;
+
+    padding:0 8px;
+
+    font-size:13px;
+    cursor:pointer;
+
+    outline:none;
+
+    transition:all 0.2s ease;
+}
+
+/* Hover */
+.filter-dropdown:hover{
+    border-color:rgba(255,255,255,0.2);
+}
+
+/* Focus glow */
+.filter-dropdown:focus{
+    border-color:#4f46e5;
+    box-shadow:0 0 8px rgba(79,70,229,0.6);
+    background:#151926;
+}
+
+
+/* =========================
+   DROPDOWN OPTIONS (basic)
+========================= */
+
+.filter-dropdown option{
+    background:#12151c;
+    color:#e6e8ee;
 }
 
 
@@ -1498,7 +1565,15 @@ background:#ff3b3b;
     <span class="friend-star">⭐</span>
 </div>
 
-<input class="search-box" placeholder="Search">
+<div class="search-filter-row">
+    <input id="friendSearch" class="search-box" placeholder="Search">
+
+    <select id="friendFilter" class="filter-dropdown">
+        <option value="all">All</option>
+        <option value="online">Online</option>
+        <option value="offline">Offline</option>
+    </select>
+</div>
 
 <!-- FRIENDS LIST -->
 <div class="friends-list">
@@ -1726,6 +1801,7 @@ async function refreshOnlineStatus() {
     } catch (err) {
         console.error("Online status error:", err);
     }
+    filterAndSortFriends();
 }
 
 /* =========================
@@ -2326,6 +2402,62 @@ function showNotification(message, type="info", duration=4000) {
 
 // 🔥 Call once on page load to populate the panel
 refreshFriendPanel();
+
+const searchInput = document.getElementById("friendSearch");
+const filterSelect = document.getElementById("friendFilter");
+
+function filterAndSortFriends() {
+    const search = searchInput.value.toLowerCase();
+    const filter = filterSelect.value;
+
+    const items = Array.from(document.querySelectorAll(".friend-item"));
+
+    let visibleItems = [];
+
+    items.forEach(item => {
+        const name = item.dataset.name.toLowerCase();
+        const isOnline = item.classList.contains("online");
+
+        // 🔍 SEARCH MATCH
+        const matchesSearch = name.includes(search);
+
+        // 🎯 FILTER MATCH
+        let matchesFilter = true;
+
+        if (filter === "online") matchesFilter = isOnline;
+        if (filter === "offline") matchesFilter = !isOnline;
+
+        if (matchesSearch && matchesFilter) {
+            item.style.display = "flex";
+            visibleItems.push(item);
+        } else {
+            item.style.display = "none";
+        }
+    });
+
+    // 🔥 SORTING
+    visibleItems.sort((a, b) => {
+        const aOnline = a.classList.contains("online");
+        const bOnline = b.classList.contains("online");
+
+        if (filter === "online") {
+            return (bOnline - aOnline); // online first
+        }
+
+        if (filter === "offline") {
+            return (aOnline - bOnline); // offline first
+        }
+
+        return 0; // keep original order for "all"
+    });
+
+    // 🔄 REORDER DOM
+    const container = document.querySelector(".friends-list");
+    visibleItems.forEach(item => container.appendChild(item));
+}
+
+searchInput.addEventListener("input", filterAndSortFriends);
+filterSelect.addEventListener("change", filterAndSortFriends);
 </script>
 
 </body>
