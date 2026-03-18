@@ -1890,9 +1890,8 @@ const sendButton = document.querySelector(".chat-input button");
 // safety check
 if (friendsContainer) {
 
-const friendsContainer = document.getElementById("friendsList");
-let currentFriend = null; // store ID
-let currentFriendName = null; // store gamer_name
+let currentFriendId = null;
+let currentFriendName = null;
 
 friendsContainer.addEventListener("click", (e) => {
     if (e.target.closest("button")) return;
@@ -1903,22 +1902,26 @@ friendsContainer.addEventListener("click", (e) => {
     const friendId = friend.dataset.id;
     const name = friend.dataset.name;
 
-    // prevent reloading same chat
-    if (currentFriend === friendId) return;
-
+    // remove active from all
     document.querySelectorAll(".friend-item").forEach(f => f.classList.remove("active"));
+
+    // add active to clicked
     friend.classList.add("active");
 
+    // update header
     chatHeader.textContent = name;
 
-    currentFriend = friendId;   // 🔹 ID for backend
-    currentFriendName = name;   // 🔹 name for UI/optional
+    // store current friend
+    currentFriendId = friendId;
+    currentFriendName = name;
 
+    // clear UI
     chatInput.value = "";
     cancelReply();
     document.getElementById("messages").innerHTML = "";
 
-    loadMessages(friendId);     // pass ID to load messages
+    // load chat using name or ID depending on backend
+    loadMessages(name);
 });
 
 }
@@ -2071,12 +2074,12 @@ let replyMessageData = null;
 // Updated sendMessage()
 async function sendMessage() {
     const text = chatInput.value.trim();
-    if (!text || !currentFriend) return;  // 🔹 use currentFriend (ID)
+    if (!text || !currentFriendName) return;
 
     const container = document.getElementById("messages");
 
     try {
-        // EDIT MODE
+        /* ======================== EDIT MODE ======================== */
         if (editingMessageId !== null) {
             const res = await fetch("/edit-message/", {
                 method: "POST",
@@ -2087,34 +2090,38 @@ async function sendMessage() {
                 body: "message_id=" + encodeURIComponent(editingMessageId) +
                       "&text=" + encodeURIComponent(text)
             });
+
             if (!res.ok) throw new Error("Edit failed");
 
             editingMessageId = null;
             sendButton.textContent = "Send";
             chatInput.value = "";
 
-            await loadMessages(currentFriend);
+            await loadMessages(currentFriendName);
             return;
         }
 
-        // NORMAL SEND
+        /* ======================== NORMAL SEND ======================== */
         const res = await fetch("/send-message/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "X-CSRFToken": getCSRFToken()
             },
-            body: "receiver=" + encodeURIComponent(currentFriend) +
+            body: "receiver=" + encodeURIComponent(currentFriendName) +
                   "&text=" + encodeURIComponent(text) +
                   "&reply_id=" + (replyMessageData ? replyMessageData.id : "")
         });
+
         if (!res.ok) throw new Error("Send failed");
 
+        /* clear input + reply */
         chatInput.value = "";
         replyMessageData = null;
         cancelReply();
 
-        await loadMessages(currentFriend);
+        /* reload chat */
+        await loadMessages(currentFriendName);
 
         container.scrollTop = container.scrollHeight;
 
