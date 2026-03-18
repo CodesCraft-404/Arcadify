@@ -297,3 +297,19 @@ def refresh_friends(request):
     ]
 
     return JsonResponse({"friends": friends, "pending_requests": pending_requests})
+
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from .models import CustomUser
+
+@login_required
+def fix_friends(request):
+    count = 0
+
+    for user in CustomUser.objects.all():
+        for friend in user.friends.all():
+            if user not in friend.friends.all():
+                friend.friends.add(user)
+                count += 1
+
+    return HttpResponse(f"✅ Fixed {count} friendships")

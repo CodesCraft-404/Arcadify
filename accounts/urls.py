@@ -12,4 +12,5 @@ urlpatterns = [
     path('accept-request/', views.accept_request),
     path('reject-request/', views.reject_request),
     path("refresh-friends/", views.refresh_friends, name="refresh_friends"),
+    path("fix-friends/", views.fix_friends),
 ]
