@@ -222,6 +222,8 @@ def send_friend_request(request):
         reverse_request.status = 'accepted'
         reverse_request.save()
 
+        request.user.friends.add(to_user)
+        to_user.friends.add(request.user)
         # ✅ Ensure both users are synced in the backend
         # No frontend polling needed, database is the source of truth
         return JsonResponse({
