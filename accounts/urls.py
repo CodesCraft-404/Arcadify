@@ -12,4 +12,8 @@ urlpatterns = [
     path('accept-request/', views.accept_request),
     path('reject-request/', views.reject_request),
     path("refresh-friends/", views.refresh_friends, name="refresh_friends"),
+    path("get-messages/", views.get_messages),
+    path("send-message/", views.send_message),
+    path("edit-message/", views.edit_message),
+    path("delete-message/", views.delete_message),
 ]

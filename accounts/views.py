@@ -297,3 +297,132 @@ def refresh_friends(request):
     ]
 
     return JsonResponse({"friends": friends, "pending_requests": pending_requests})
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+from django.utils.timezone import localtime
+
+from .models import Message
+
+User = get_user_model()
+
+
+# =========================
+# 🔥 LOAD MESSAGES
+# =========================
+@login_required
+def get_messages(request):
+    friend_id = request.GET.get("friend")
+
+    if not friend_id:
+        return JsonResponse({"messages": []})
+
+    try:
+        friend = User.objects.get(id=friend_id)
+    except User.DoesNotExist:
+        return JsonResponse({"messages": []})
+
+    messages = Message.objects.filter(
+        sender__in=[request.user, friend],
+        receiver__in=[request.user, friend]
+    ).order_by("created_at")
+
+    data = []
+
+    for msg in messages:
+        data.append({
+            "id": msg.id,
+            "text": "[deleted]" if msg.is_deleted else msg.text,
+            "type": "me" if msg.sender == request.user else "other",
+            "deleted": msg.is_deleted,
+            "edited": msg.is_edited,
+            "time": localtime(msg.created_at).strftime("%I:%M %p"),
+            "raw_time": msg.created_at.isoformat(),
+
+            # 🔥 reply support
+            "reply": {
+                "id": msg.reply_to.id,
+                "text": msg.reply_to.text,
+                "sender": "you" if msg.reply_to.sender == request.user else msg.reply_to.sender.gamer_name
+            } if msg.reply_to else None
+        })
+
+    return JsonResponse({"messages": data})
+
+
+# =========================
+# 💬 SEND MESSAGE
+# =========================
+@require_POST
+@login_required
+def send_message(request):
+    receiver_id = request.POST.get("receiver")
+    text = request.POST.get("text")
+    reply_id = request.POST.get("reply_id")
+
+    if not receiver_id or not text:
+        return JsonResponse({"error": "Missing data"}, status=400)
+
+    try:
+        receiver = User.objects.get(id=receiver_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    reply_obj = None
+    if reply_id:
+        try:
+            reply_obj = Message.objects.get(id=reply_id)
+        except Message.DoesNotExist:
+            pass
+
+    Message.objects.create(
+        sender=request.user,
+        receiver=receiver,
+        text=text,
+        reply_to=reply_obj
+    )
+
+    return JsonResponse({"success": True})
+
+
+# =========================
+# ✏️ EDIT MESSAGE
+# =========================
+@require_POST
+@login_required
+def edit_message(request):
+    msg_id = request.POST.get("message_id")
+    new_text = request.POST.get("text")
+
+    try:
+        msg = Message.objects.get(id=msg_id, sender=request.user)
+    except Message.DoesNotExist:
+        return JsonResponse({"error": "Not allowed"}, status=403)
+
+    msg.text = new_text
+    msg.is_edited = True
+    msg.save()
+
+    return JsonResponse({"success": True})
+
+
+# =========================
+# 🗑 DELETE MESSAGE
+# =========================
+@require_POST
+@login_required
+def delete_message(request):
+    msg_id = request.POST.get("message_id")
+
+    try:
+        msg = Message.objects.get(id=msg_id, sender=request.user)
+    except Message.DoesNotExist:
+        return JsonResponse({"error": "Not allowed"}, status=403)
+
+    msg.is_deleted = True
+    msg.save()
+
+    return JsonResponse({"success": True})
