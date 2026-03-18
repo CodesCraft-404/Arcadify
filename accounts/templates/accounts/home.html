@@ -1682,14 +1682,50 @@ document.getElementById("prevChar").addEventListener("click", () => {
     updatePreviewImage();
 });
 
-function openFriendsPanel(){
-document.getElementById("overlay").classList.add("show");
-document.getElementById("friendsPanel").classList.add("show");
+let friendPanelOpen = false;
+let refreshInterval = null;
+
+function openFriendsPanel() {
+    document.getElementById("overlay").classList.add("show");
+    document.getElementById("friendsPanel").classList.add("show");
+
+    friendPanelOpen = true;
+
+    // 🔥 instant refresh when opened
+    refreshFriendPanel();
+
+    // 🔥 start live updates
+    refreshInterval = setInterval(() => {
+        refreshOnlineStatus(); // lighter than full refresh
+    }, 5000);
 }
 
-function closeFriendsPanel(){
-document.getElementById("overlay").classList.remove("show");
-document.getElementById("friendsPanel").classList.remove("show");
+function closeFriendsPanel() {
+    document.getElementById("overlay").classList.remove("show");
+    document.getElementById("friendsPanel").classList.remove("show");
+
+    friendPanelOpen = false;
+
+    // 🛑 stop updates when closed
+    clearInterval(refreshInterval);
+}
+
+async function refreshOnlineStatus() {
+    try {
+        const res = await fetch("/refresh-friends/");
+        const data = await res.json();
+
+        data.friends.forEach(f => {
+            const el = document.querySelector(`.friend-item[data-name="${f.gamer_name}"]`);
+            if (!el) return;
+
+            el.classList.toggle("online", f.is_online);
+            el.classList.toggle("offline", !f.is_online);
+        });
+
+    } catch (err) {
+        console.error("Online status error:", err);
+    }
 }
 
 /* =========================
