@@ -737,7 +737,7 @@ flex-direction:column;
 
 gap:4px;
 
-padding:6px 4px;
+padding:6px 8px;
 
 border-top:1px solid rgba(255,255,255,0.08);
 border-bottom:1px solid rgba(255,255,255,0.08);
@@ -2408,24 +2408,17 @@ function filterAndSortFriends() {
     const search = searchInput.value.toLowerCase();
     const filter = filterSelect.value;
 
-    const items = Array.from(document.querySelectorAll(".friend-item"));
+    const container = document.querySelector(".friends-list");
+    const items = Array.from(container.querySelectorAll(".friend-item"));
 
+    // 🔍 FILTER (ONLY SEARCH, NOT ONLINE/OFFLINE)
     let visibleItems = [];
 
     items.forEach(item => {
         const name = item.dataset.name.toLowerCase();
-        const isOnline = item.classList.contains("online");
-
-        // 🔍 SEARCH MATCH
         const matchesSearch = name.includes(search);
 
-        // 🎯 FILTER MATCH
-        let matchesFilter = true;
-
-        if (filter === "online") matchesFilter = isOnline;
-        if (filter === "offline") matchesFilter = !isOnline;
-
-        if (matchesSearch && matchesFilter) {
+        if (matchesSearch) {
             item.style.display = "flex";
             visibleItems.push(item);
         } else {
@@ -2433,24 +2426,23 @@ function filterAndSortFriends() {
         }
     });
 
-    // 🔥 SORTING
+    // 🔥 SORTING BASED ON DROPDOWN
     visibleItems.sort((a, b) => {
         const aOnline = a.classList.contains("online");
         const bOnline = b.classList.contains("online");
 
         if (filter === "online") {
-            return (bOnline - aOnline); // online first
+            return bOnline - aOnline; // online first
         }
 
         if (filter === "offline") {
-            return (aOnline - bOnline); // offline first
+            return aOnline - bOnline; // offline first
         }
 
         return 0; // keep original order for "all"
     });
 
-    // 🔄 REORDER DOM
-    const container = document.querySelector(".friends-list");
+    // 🔄 APPLY ORDER
     visibleItems.forEach(item => container.appendChild(item));
 }
 
